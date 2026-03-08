@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fufu Spaced Rep</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0b0f1a; }
+  </style>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ── localStorage shim (mirrors window.storage API from Claude artifacts) ──
+window.storage = {
+  get: async (key) => ({ value: localStorage.getItem(key) }),
+  set: async (key, value) => { localStorage.setItem(key, value); },
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   DEFAULT QUESTIONS — Rebuild safety net
+   These merge into localStorage on every load (matched by trimmed question text).
+   Claude Code adds new questions here via surgical edit.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+const DEFAULT_QUESTIONS = [
+  {
+    id: 1,
+    question: "A game collection contains only cards and tiles. Each card shows 1 symbol, and each tile shows 4 symbols. Exactly 40% of the collection are tiles. If there are 264 symbols altogether, how many items are in the collection?",
+    notes: "",
+    dateAdded: "2025-02-11",
+    attempts: ["2025-02-11"],
+  },
+  {
+    id: 2,
+    question: "X^(a/b) means: take the b-th root of X, then raise to the a-th power. Equivalently, (\u1d47\u221aX)\u1d43.\n\nExample 1: What is 81^(5/4)?\nExample 2: What is 32^(3/5)?",
+    notes: "Fractional exponents \u2014 numerator is power, denominator is root. Related to discomfort with \u221a3\u00b3 on AMC 8 2025 Q8.",
+    dateAdded: "2026-03-07",
+    attempts: ["2026-03-07"],
+  },
+];
+
+/* ═══════════════════════════════════════════════════════════════════════════════ */
+
+const TODAY = new Date().toISOString().split("T")[0];
+const STORAGE_KEY = "fufu-spaced-rep-v1";
+const BACKUP_KEY = "fufu-spaced-rep-v1-backup";
+const EXPORT_REMINDER_KEY = "fufu-last-exported";
+
+// ── Utilities ────────────────────────────────────────────────────────────────
+
+const daysBetween = (a, b) => Math.round(Math.abs(new Date(a) - new Date(b)) / 86400000);
+
+const fmtDate = (iso) =>
+  new Date(iso + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+const getInterval = (n) => (n <= 1 ? 3 : n === 2 ? 7 : n === 3 ? 14 : 30);
+
+function getDue(q) {
+  if (!q.attempts.length) return { due: true, ago: null, next: 3 };
+  const ago = daysBetween(q.attempts[q.attempts.length - 1], TODAY);
+  const next = getInterval(q.attempts.length);
+  return { due: ago >= next, ago, next };
+}
+
+const agoLabel = (d) => (d === null ? "new" : d === 0 ? "today" : `${d}d ago`);
+
+function mergeDefaults(loaded) {
+  const seen = new Set(loaded.map((q) => q.question.trim()));
+  let maxId = loaded.reduce((m, q) => Math.max(m, q.id), 0);
+  const missing = DEFAULT_QUESTIONS.filter((d) => !seen.has(d.question.trim()));
+  return [...loaded, ...missing.map((d) => ({ ...d, id: ++maxId }))];
+}
+
+function nextId(qs) {
+  return qs.reduce((m, q) => Math.max(m, q.id), 0) + 1;
+}
+
+// ── Storage helpers ──────────────────────────────────────────────────────────
+
+async function storageLoad() {
+  let qs = [];
+  for (const key of [STORAGE_KEY, BACKUP_KEY]) {
+    if (qs.length) break;
+    try {
+      const r = await window.storage.get(key);
+      if (r?.value) {
+        const p = JSON.parse(r.value);
+        const arr = Array.isArray(p) ? p : p.questions;
+        if (Array.isArray(arr) && arr.length) qs = arr;
+      }
+    } catch {}
+  }
+  return mergeDefaults(qs);
+}
+
+async function storageSave(qs, prevCount) {
+  if (qs.length === 0 && prevCount > 0) return;
+  try {
+    await window.storage.set(STORAGE_KEY, JSON.stringify(qs));
+    if (qs.length > 0) {
+      await window.storage.set(
+        BACKUP_KEY,
+        JSON.stringify({ questions: qs, ts: new Date().toISOString() })
+      );
+    }
+  } catch {}
+}
+
+// ── Theme ────────────────────────────────────────────────────────────────────
+
+const C = {
+  bg: "#0b0f1a", card: "#141926", cardAlt: "#0e1220", border: "#1e2640",
+  accent: "#3b82f6", text: "#c9d1d9", dim: "#4b5563",
+  warn: "#d97706", good: "#22c55e", danger: "#ef4444",
+};
+const FONT = "'Inter', -apple-system, system-ui, sans-serif";
+const MONO = "'JetBrains Mono', 'SF Mono', 'Consolas', monospace";
+
+const btn = (bg, fg = C.text) => ({
+  background: bg, color: fg, border: "none", padding: "6px 14px",
+  borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: "pointer",
+  fontFamily: FONT, lineHeight: 1.4,
+});
+
+const pillBtn = (active) => ({
+  ...btn(active ? C.accent + "22" : "transparent", active ? C.accent : C.dim),
+  border: `1px solid ${active ? C.accent + "44" : C.border}`,
+  borderRadius: 4, fontSize: 12, padding: "4px 10px",
+});
+
+const inputStyle = {
+  width: "100%", background: C.bg, color: C.text,
+  border: `1px solid ${C.border}`, borderRadius: 6, padding: 10,
+  fontSize: 14, fontFamily: FONT, boxSizing: "border-box", outline: "none",
+};
+
+// ── Component ────────────────────────────────────────────────────────────────
+
+function SpacedRepTracker() {
+  const [qs, setQs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("review");
+  const [expanded, setExpanded] = useState(null);
+  const [editing, setEditing] = useState(null);
+  const [sort, setSort] = useState("stalest");
+  const [search, setSearch] = useState("");
+  const [toast, setToast] = useState(null);
+  const [lastExp, setLastExp] = useState(null);
+  const [delConfirm, setDelConfirm] = useState(null);
+  const [addQ, setAddQ] = useState("");
+  const [addN, setAddN] = useState("");
+  const fileRef = useRef(null);
+  const prevCountRef = useRef(0);
+
+  const flash = useCallback((msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2500);
+  }, []);
+
+  const save = useCallback(async (newQs) => {
+    await storageSave(newQs, prevCountRef.current);
+    prevCountRef.current = newQs.length;
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const loaded = await storageLoad();
+      setQs(loaded);
+      prevCountRef.current = loaded.length;
+      await storageSave(loaded, 0);
+      try {
+        const r = await window.storage.get(EXPORT_REMINDER_KEY);
+        if (r?.value) setLastExp(r.value);
+      } catch {}
+      setLoading(false);
+    })();
+  }, []);
+
+  const doAdd = async () => {
+    if (!addQ.trim()) return;
+    const q = { id: nextId(qs), question: addQ.trim(), notes: addN.trim(), dateAdded: TODAY, attempts: [TODAY] };
+    const updated = [...qs, q];
+    setQs(updated);
+    await save(updated);
+    setAddQ(""); setAddN("");
+    flash("Added");
+    setTab("all");
+  };
+
+  const doAttempt = async (id) => {
+    const updated = qs.map((q) =>
+      q.id === id ? { ...q, attempts: q.attempts.includes(TODAY) ? q.attempts : [...q.attempts, TODAY] } : q
+    );
+    setQs(updated);
+    await save(updated);
+  };
+
+  const doUndo = async (id) => {
+    const updated = qs.map((q) =>
+      q.id === id && q.attempts.length ? { ...q, attempts: q.attempts.slice(0, -1) } : q
+    );
+    setQs(updated);
+    await save(updated);
+    flash("Last attempt undone");
+  };
+
+  const doDel = async (id) => {
+    const updated = qs.filter((q) => q.id !== id);
+    prevCountRef.current = updated.length;
+    setQs(updated);
+    await save(updated);
+    setDelConfirm(null);
+    if (expanded === id) setExpanded(null);
+    flash("Deleted");
+  };
+
+  const startEdit = (q, field) => setEditing({ id: q.id, field, value: q[field] || "" });
+
+  const commitEdit = async () => {
+    if (!editing) return;
+    const updated = qs.map((q) =>
+      q.id === editing.id ? { ...q, [editing.field]: editing.value.trim() } : q
+    );
+    setQs(updated);
+    await save(updated);
+    setEditing(null);
+    flash("Saved");
+  };
+
+  const doExport = async () => {
+    const data = JSON.stringify({ version: 1, exported: TODAY, questions: qs }, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    Object.assign(document.createElement("a"), { href: url, download: `fufu-spaced-rep-${TODAY}.json` }).click();
+    URL.revokeObjectURL(url);
+    setLastExp(TODAY);
+    try { await window.storage.set(EXPORT_REMINDER_KEY, TODAY); } catch {}
+    flash("Exported");
+  };
+
+  const doImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (ev) => {
+      try {
+        const parsed = JSON.parse(ev.target.result);
+        const incoming = Array.isArray(parsed) ? parsed : parsed.questions;
+        if (!Array.isArray(incoming)) throw new Error("bad format");
+        const existingTexts = new Set(qs.map((q) => q.question.trim()));
+        const fresh = incoming.filter((q) => !existingTexts.has(q.question.trim()));
+        let id = nextId(qs) - 1;
+        const renumbered = fresh.map((q) => ({ ...q, id: ++id }));
+        const merged = [...qs, ...renumbered];
+        setQs(merged);
+        await save(merged);
+        flash(`${renumbered.length} added, ${incoming.length - renumbered.length} dupes skipped`);
+      } catch { flash("Import failed: invalid JSON"); }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  // ── Derived ──
+
+  const dueQs = qs.filter((q) => getDue(q).due);
+  const expAgo = lastExp ? daysBetween(lastExp, TODAY) : null;
+  const expWarn = expAgo === null ? "Never exported" : expAgo === 0 ? null : `Exported ${expAgo}d ago`;
+
+  const list = tab === "review" ? dueQs : qs;
+  const searched = search
+    ? list.filter((q) =>
+        q.question.toLowerCase().includes(search.toLowerCase()) ||
+        (q.notes && q.notes.toLowerCase().includes(search.toLowerCase()))
+      )
+    : list;
+
+  const sorted = [...searched].sort((a, b) => {
+    if (sort === "stalest") {
+      const aL = a.attempts.length ? a.attempts[a.attempts.length - 1] : "0000";
+      const bL = b.attempts.length ? b.attempts[b.attempts.length - 1] : "0000";
+      return aL < bL ? -1 : aL > bL ? 1 : 0;
+    }
+    if (sort === "oldest") return a.dateAdded < b.dateAdded ? -1 : 1;
+    return a.dateAdded > b.dateAdded ? -1 : 1;
+  });
+
+  // ── Render ──
+
+  if (loading)
+    return (
+      <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", color: C.dim, fontFamily: MONO, fontSize: 13 }}>
+        Loading...
+      </div>
+    );
+
+  const tabBtn = (name, label) => (
+    <button onClick={() => setTab(name)} style={{
+      ...btn("transparent", tab === name ? C.accent : C.dim),
+      borderBottom: `2px solid ${tab === name ? C.accent : "transparent"}`,
+      borderRadius: 0, padding: "8px 16px", fontWeight: tab === name ? 600 : 400,
+    }}>
+      {label}
+    </button>
+  );
+
+  return (
+    <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: FONT, padding: "20px 16px" }}>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+      <div style={{ maxWidth: 640, margin: "0 auto" }}>
+
+        {/* Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 600 }}>Fufu Spaced Rep</div>
+            <div style={{ fontSize: 12, color: C.dim, fontFamily: MONO, marginTop: 2 }}>
+              {qs.length} question{qs.length !== 1 ? "s" : ""} ·{" "}
+              <span style={{ color: dueQs.length ? C.warn : C.dim }}>{dueQs.length} due</span>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 6 }}>
+            <button onClick={doExport} style={btn(C.card, C.dim)} title="Download JSON">Export</button>
+            <button onClick={() => fileRef.current?.click()} style={btn(C.card, C.dim)}>Import</button>
+            <input ref={fileRef} type="file" accept=".json" onChange={doImport} style={{ display: "none" }} />
+          </div>
+        </div>
+
+        {/* Export warning */}
+        {expWarn && (
+          <div style={{ background: "#1a1400", border: `1px solid ${C.warn}33`, borderRadius: 6, padding: "6px 12px", marginBottom: 12, fontSize: 12, color: C.warn, fontFamily: MONO }}>
+            {expWarn}
+          </div>
+        )}
+
+        {/* Toast */}
+        {toast && (
+          <div style={{ background: C.accent + "18", border: `1px solid ${C.accent}33`, borderRadius: 6, padding: "6px 12px", marginBottom: 12, fontSize: 13, color: C.accent, fontFamily: MONO, textAlign: "center" }}>
+            {toast}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: `1px solid ${C.border}`, marginBottom: 12 }}>
+          {tabBtn("review", `Review${dueQs.length ? ` (${dueQs.length})` : ""}`)}
+          {tabBtn("all", "All")}
+          {tabBtn("add", "+ Add")}
+        </div>
+
+        {/* Add form */}
+        {tab === "add" && (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 16, marginBottom: 16 }}>
+            <textarea value={addQ} onChange={(e) => setAddQ(e.target.value)} placeholder="Problem text..."
+              style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
+            <input value={addN} onChange={(e) => setAddN(e.target.value)} placeholder="Notes (optional)..."
+              style={{ ...inputStyle, fontSize: 13, marginTop: 8 }} />
+            <button onClick={doAdd} disabled={!addQ.trim()}
+              style={{ ...btn(C.accent), marginTop: 10, opacity: addQ.trim() ? 1 : 0.4, cursor: addQ.trim() ? "pointer" : "default" }}>
+              Add Question
+            </button>
+          </div>
+        )}
+
+        {/* Sort & Search */}
+        {tab !== "add" && (
+          <div style={{ display: "flex", gap: 8, marginBottom: 12, flexWrap: "wrap", alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 4 }}>
+              {[["stalest", "Stalest"], ["oldest", "Oldest"], ["newest", "Newest"]].map(([v, l]) => (
+                <button key={v} onClick={() => setSort(v)} style={pillBtn(sort === v)}>{l}</button>
+              ))}
+            </div>
+            {tab === "all" && (
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..."
+                style={{ ...inputStyle, width: "auto", flex: 1, minWidth: 100, fontSize: 13, padding: "4px 10px" }} />
+            )}
+          </div>
+        )}
+
+        {/* Question list */}
+        {tab !== "add" && (sorted.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 0", color: C.dim, fontFamily: MONO, fontSize: 13 }}>
+            {tab === "review" ? "Nothing due. All caught up." : search ? "No matches." : "No questions yet."}
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {sorted.map((q) => {
+              const { due, ago, next } = getDue(q);
+              const doneToday = q.attempts.includes(TODAY);
+              const isExp = expanded === q.id;
+              const isDel = delConfirm === q.id;
+              const isEditing = editing?.id === q.id;
+
+              return (
+                <div key={q.id} style={{ background: C.card, border: `1px solid ${due ? C.warn + "44" : C.border}`, borderRadius: 8, overflow: "hidden" }}>
+                  {/* Card header */}
+                  <div style={{ padding: "10px 14px", cursor: "pointer", display: "flex", gap: 10, alignItems: "flex-start" }}
+                    onClick={() => setExpanded(isExp ? null : q.id)}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {isEditing ? (
+                        <div onClick={(e) => e.stopPropagation()}>
+                          <div style={{ fontSize: 11, color: C.dim, fontFamily: MONO, marginBottom: 4 }}>
+                            editing {editing.field === "question" ? "question" : "notes"}
+                          </div>
+                          <textarea value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })}
+                            style={{ ...inputStyle, borderColor: C.accent, minHeight: 60, resize: "vertical" }} />
+                          <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                            <button onClick={commitEdit} style={btn(C.accent)}>Save</button>
+                            <button onClick={() => setEditing(null)} style={btn(C.card, C.dim)}>Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div style={{ fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-line", overflow: "hidden",
+                            display: "-webkit-box", WebkitLineClamp: isExp ? 999 : 2, WebkitBoxOrient: "vertical" }}>
+                            {q.question}
+                          </div>
+                          {q.notes && <div style={{ fontSize: 12, color: C.dim, marginTop: 4, fontStyle: "italic" }}>{q.notes}</div>}
+                        </>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                      <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 500, padding: "2px 8px", borderRadius: 4,
+                        background: due ? C.warn + "22" : doneToday ? C.good + "22" : C.bg,
+                        color: due ? C.warn : doneToday ? C.good : C.dim }}>
+                        {agoLabel(ago)}
+                      </div>
+                      <div style={{ fontFamily: MONO, fontSize: 10, color: C.dim }}>{q.attempts.length}x · {next}d</div>
+                    </div>
+                  </div>
+
+                  {/* Expanded panel */}
+                  {isExp && !isEditing && (
+                    <div style={{ borderTop: `1px solid ${C.border}`, padding: "10px 14px", background: C.cardAlt }}>
+                      <div style={{ fontFamily: MONO, fontSize: 11, color: C.dim, marginBottom: 10, lineHeight: 1.6 }}>
+                        <div>
+                          Attempts ({q.attempts.length}):{" "}
+                          {q.attempts.length
+                            ? q.attempts.map((a) => `${fmtDate(a)} (${daysBetween(a, TODAY) === 0 ? "today" : daysBetween(a, TODAY) + "d ago"})`).join(", ")
+                            : "none"}
+                        </div>
+                        <div style={{ marginTop: 2 }}>Added {fmtDate(q.dateAdded)} · Next interval: {next}d</div>
+                      </div>
+                      {isDel ? (
+                        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                          <span style={{ fontSize: 13, color: C.danger }}>Delete this question?</span>
+                          <button onClick={() => doDel(q.id)} style={btn(C.danger)}>Yes, delete</button>
+                          <button onClick={() => setDelConfirm(null)} style={btn(C.card, C.dim)}>Cancel</button>
+                        </div>
+                      ) : (
+                        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                          <button onClick={(e) => { e.stopPropagation(); doAttempt(q.id); }} disabled={doneToday}
+                            style={{ ...btn(doneToday ? C.card : C.accent, doneToday ? C.dim : "#fff"),
+                              opacity: doneToday ? 0.5 : 1, cursor: doneToday ? "default" : "pointer" }}>
+                            {doneToday ? "Done today" : "Mark attempted"}
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); startEdit(q, "question"); }} style={btn(C.card, C.dim)}>Edit Q</button>
+                          <button onClick={(e) => { e.stopPropagation(); startEdit(q, "notes"); }} style={btn(C.card, C.dim)}>Edit Notes</button>
+                          <button onClick={(e) => { e.stopPropagation(); doUndo(q.id); }} disabled={!q.attempts.length}
+                            style={{ ...btn(C.card, C.dim), opacity: q.attempts.length ? 1 : 0.3, cursor: q.attempts.length ? "pointer" : "default" }}>
+                            Undo attempt
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); setDelConfirm(q.id); }} style={btn(C.card, C.danger)}>Delete</button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<SpacedRepTracker />);
+
+  </script>
+</body>
+</html>
