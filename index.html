@@ -8,6 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #0b0f1a; }
   </style>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -99,10 +100,23 @@ function getDue(q) {
 const agoLabel = (d) => (d === null ? "new" : d === 0 ? "today" : `${d}d ago`);
 
 function mergeDefaults(loaded) {
-  const seen = new Set(loaded.map((q) => q.question.trim()));
-  let maxId = loaded.reduce((m, q) => Math.max(m, q.id), 0);
+  // Backfill missing fields from defaults onto existing questions
+  const defaultsByText = new Map(DEFAULT_QUESTIONS.map((d) => [d.question.trim(), d]));
+  const updated = loaded.map((q) => {
+    const def = defaultsByText.get(q.question.trim());
+    if (!def) return q;
+    const merged = { ...q };
+    for (const key of Object.keys(def)) {
+      if (key === "id") continue;
+      if (merged[key] === undefined) merged[key] = def[key];
+    }
+    return merged;
+  });
+  // Add entirely new defaults not yet in storage
+  const seen = new Set(updated.map((q) => q.question.trim()));
+  let maxId = updated.reduce((m, q) => Math.max(m, q.id), 0);
   const missing = DEFAULT_QUESTIONS.filter((d) => !seen.has(d.question.trim()));
-  return [...loaded, ...missing.map((d) => ({ ...d, id: ++maxId }))];
+  return [...updated, ...missing.map((d) => ({ ...d, id: ++maxId }))];
 }
 
 function nextId(qs) {
@@ -342,7 +356,6 @@ function SpacedRepTracker() {
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", color: C.text, fontFamily: FONT, padding: "20px 16px" }}>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
 
         {/* Header */}
