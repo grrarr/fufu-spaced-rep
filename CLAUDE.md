@@ -52,6 +52,7 @@ Most sessions here are "add to spaced rep: [topic]". The workflow:
 ## Rules
 
 - **At the start of every session, display the app URL**: https://grrarr.github.io/fufu-spaced-rep/
+- **Be autonomous** — don't ask for confirmation on commits, pushes, file edits, or routine operations. Just do them. The only checkpoint is showing the drafted question for approval before editing `index.html`.
 - **Always show the drafted question for approval before editing the file**
 - **Always include a solution field** on new questions
 - **Always `git push` after committing** — the app is served from GitHub Pages
