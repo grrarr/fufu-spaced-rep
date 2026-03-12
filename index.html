@@ -35,6 +35,7 @@ const DEFAULT_QUESTIONS = [
     id: 1,
     question: "A game collection contains only cards and tiles. Each card shows 1 symbol, and each tile shows 4 symbols. Exactly 40% of the collection are tiles. If there are 264 symbols altogether, how many items are in the collection?",
     notes: "",
+    solution: "Let x = total items. Tiles = 0.4x, cards = 0.6x.\nSymbols: 0.6x \u00d7 1 + 0.4x \u00d7 4 = 0.6x + 1.6x = 2.2x = 264\nx = 264 / 2.2 = 120 items.",
     dateAdded: "2025-02-11",
     attempts: ["2025-02-11"],
   },
@@ -42,6 +43,7 @@ const DEFAULT_QUESTIONS = [
     id: 2,
     question: "X^(a/b) means: take the b-th root of X, then raise to the a-th power. Equivalently, (\u1d47\u221aX)\u1d43.\n\nExample 1: What is 81^(5/4)?\nExample 2: What is 32^(3/5)?",
     notes: "Fractional exponents \u2014 numerator is power, denominator is root. Related to discomfort with \u221a3\u00b3 on AMC 8 2025 Q8.",
+    solution: "Example 1: 81^(5/4) \u2014 4th root of 81 = 3, then 3\u2075 = 243.\nExample 2: 32^(3/5) \u2014 5th root of 32 = 2, then 2\u00b3 = 8.",
     dateAdded: "2026-03-07",
     attempts: ["2026-03-07"],
   },
@@ -49,6 +51,7 @@ const DEFAULT_QUESTIONS = [
     id: 3,
     question: "C(n, k) = n! / (k! \u00b7 (n\u2212k)!) counts the number of ways to choose k items from n, where order doesn't matter.\n\nExample 1: How many ways can you choose 3 students from a group of 8?\nExample 2: A pizza menu offers 10 toppings. How many different 4-topping pizzas can you make?",
     notes: "Combination formula \u2014 distinguish from permutations (where order matters). Related to Pascal's triangle.",
+    solution: "Example 1: C(8,3) = 8! / (3!\u00b75!) = (8\u00d77\u00d76) / (3\u00d72\u00d71) = 56.\nExample 2: C(10,4) = 10! / (4!\u00b76!) = (10\u00d79\u00d78\u00d77) / (4\u00d73\u00d72\u00d71) = 210.",
     dateAdded: "2026-03-08",
     attempts: ["2026-03-08"],
   },
@@ -56,6 +59,15 @@ const DEFAULT_QUESTIONS = [
     id: 4,
     question: "The Shoelace Theorem finds the area of a polygon from its vertex coordinates. List vertices in order, then compute:\nArea = \u00bd |x\u2081(y\u2082\u2212y\u2099) + x\u2082(y\u2083\u2212y\u2081) + x\u2083(y\u2084\u2212y\u2082) + ... + x\u2099(y\u2081\u2212y\u2099\u208b\u2081)|\n\nExample 1: Find the area of the triangle with vertices (1, 1), (4, 1), (4, 5).\nExample 2: Find the area of the quadrilateral with vertices (0, 0), (4, 0), (3, 3), (1, 4).",
     notes: "Shoelace formula \u2014 useful when vertices are given as coordinates. Cross-multiply diagonals down-right and down-left, subtract, halve. Also called the surveyor's formula.",
+    solution: "Example 1: \u00bd|1(1\u22125) + 4(5\u22121) + 4(1\u22121)| = \u00bd|\u22124 + 16 + 0| = \u00bd(12) = 6.\nExample 2: \u00bd|0(0\u22124) + 4(3\u22120) + 3(4\u22120) + 1(0\u22123)| = \u00bd|0 + 12 + 12 \u2212 3| = \u00bd(21) = 10.5.",
+    dateAdded: "2026-03-08",
+    attempts: ["2026-03-08"],
+  },
+  {
+    id: 5,
+    question: "Five integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many of these five numbers are divisible by 3?\nA) 0   B) 1   C) 2   D) 3   E) Impossible to determine\n\nExample 2: Seven integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many must be divisible by 3?\nExample 3: Four integers are written around a circle so that no two adjacent numbers have a sum divisible by 3. Can all four be divisible by 3?",
+    notes: "Modular arithmetic on circular arrangements. Think in residues mod 3 \u2014 constraint forces a pattern on the residues.",
+    solution: "Think in residues mod 3: {0, 1, 2}. \"No two adjacent sum to 0 mod 3\" bans pairs (0,0), (1,2), (2,1). So adjacent numbers must share the same nonzero residue, or one is 0 and the other nonzero.\n\nOriginal (5 on circle): The 0-residues can't be adjacent. Working through: exactly 2 must be divisible by 3. Answer: C.\n\nExample 2 (7 on circle): Same logic \u2014 2 must be divisible by 3.\n\nExample 3 (4 on circle): If all four \u2261 0 mod 3, every adjacent pair sums to 0 mod 3. So no \u2014 at most 2 of 4 can be divisible by 3.",
     dateAdded: "2026-03-08",
     attempts: ["2026-03-08"],
   },
@@ -171,6 +183,8 @@ function SpacedRepTracker() {
   const [delConfirm, setDelConfirm] = useState(null);
   const [addQ, setAddQ] = useState("");
   const [addN, setAddN] = useState("");
+  const [addS, setAddS] = useState("");
+  const [showSolution, setShowSolution] = useState(null);
   const fileRef = useRef(null);
   const prevCountRef = useRef(0);
 
@@ -200,11 +214,11 @@ function SpacedRepTracker() {
 
   const doAdd = async () => {
     if (!addQ.trim()) return;
-    const q = { id: nextId(qs), question: addQ.trim(), notes: addN.trim(), dateAdded: TODAY, attempts: [TODAY] };
+    const q = { id: nextId(qs), question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [TODAY] };
     const updated = [...qs, q];
     setQs(updated);
     await save(updated);
-    setAddQ(""); setAddN("");
+    setAddQ(""); setAddN(""); setAddS("");
     flash("Added");
     setTab("all");
   };
@@ -375,6 +389,8 @@ function SpacedRepTracker() {
               style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
             <input value={addN} onChange={(e) => setAddN(e.target.value)} placeholder="Notes (optional)..."
               style={{ ...inputStyle, fontSize: 13, marginTop: 8 }} />
+            <textarea value={addS} onChange={(e) => setAddS(e.target.value)} placeholder="Solution (optional, hidden until revealed)..."
+              style={{ ...inputStyle, fontSize: 13, marginTop: 8, minHeight: 60, resize: "vertical" }} />
             <button onClick={doAdd} disabled={!addQ.trim()}
               style={{ ...btn(C.accent), marginTop: 10, opacity: addQ.trim() ? 1 : 0.4, cursor: addQ.trim() ? "pointer" : "default" }}>
               Add Question
@@ -420,7 +436,7 @@ function SpacedRepTracker() {
                       {isEditing ? (
                         <div onClick={(e) => e.stopPropagation()}>
                           <div style={{ fontSize: 11, color: C.dim, fontFamily: MONO, marginBottom: 4 }}>
-                            editing {editing.field === "question" ? "question" : "notes"}
+                            editing {editing.field}
                           </div>
                           <textarea value={editing.value} onChange={(e) => setEditing({ ...editing, value: e.target.value })}
                             style={{ ...inputStyle, borderColor: C.accent, minHeight: 60, resize: "vertical" }} />
@@ -461,6 +477,20 @@ function SpacedRepTracker() {
                         </div>
                         <div style={{ marginTop: 2 }}>Added {fmtDate(q.dateAdded)} · Next interval: {next}d</div>
                       </div>
+                      {/* Solution reveal */}
+                      {q.solution && (
+                        <div style={{ marginBottom: 10 }}>
+                          <button onClick={(e) => { e.stopPropagation(); setShowSolution(showSolution === q.id ? null : q.id); }}
+                            style={{ ...btn(C.card, showSolution === q.id ? C.accent : C.dim), border: `1px solid ${showSolution === q.id ? C.accent + "44" : C.border}`, fontSize: 12, marginBottom: showSolution === q.id ? 8 : 0 }}>
+                            {showSolution === q.id ? "\u25B2 Hide Solution" : "\u25BC Show Solution"}
+                          </button>
+                          {showSolution === q.id && (
+                            <div style={{ background: C.bg, border: `1px solid ${C.good}33`, borderRadius: 6, padding: "10px 12px", fontSize: 13, lineHeight: 1.6, whiteSpace: "pre-line", color: C.good }}>
+                              {q.solution}
+                            </div>
+                          )}
+                        </div>
+                      )}
                       {isDel ? (
                         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                           <span style={{ fontSize: 13, color: C.danger }}>Delete this question?</span>
@@ -476,6 +506,7 @@ function SpacedRepTracker() {
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "question"); }} style={btn(C.card, C.dim)}>Edit Q</button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "notes"); }} style={btn(C.card, C.dim)}>Edit Notes</button>
+                          <button onClick={(e) => { e.stopPropagation(); startEdit(q, "solution"); }} style={btn(C.card, C.dim)}>Edit Solution</button>
                           <button onClick={(e) => { e.stopPropagation(); doUndo(q.id); }} disabled={!q.attempts.length}
                             style={{ ...btn(C.card, C.dim), opacity: q.attempts.length ? 1 : 0.3, cursor: q.attempts.length ? "pointer" : "default" }}>
                             Undo attempt
