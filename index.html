@@ -124,7 +124,16 @@ function mergeDefaults(loaded) {
   // Add entirely new defaults not yet in storage
   let maxId = updated.reduce((m, q) => Math.max(m, q.id), 0);
   const missing = DEFAULT_QUESTIONS.filter((d) => !matchedDefaultIds.has(d.id));
-  return [...updated, ...missing.map((d) => ({ ...d, id: ++maxId }))];
+  const merged = [...updated, ...missing.map((d) => ({ ...d, id: ++maxId }))];
+  // Deduplicate by question text — keeps first occurrence (the id-matched one),
+  // removes orphan duplicates left by old text-based matching
+  const seenText = new Set();
+  return merged.filter((q) => {
+    const key = q.question.trim();
+    if (seenText.has(key)) return false;
+    seenText.add(key);
+    return true;
+  });
 }
 
 function nextId(qs) {
