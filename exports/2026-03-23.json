@@ -6,7 +6,10 @@
     "solution": "Let x = total items. Tiles = 0.4x, cards = 0.6x.\nSymbols: 0.6x × 1 + 0.4x × 4 = 0.6x + 1.6x = 2.2x = 264\nx = 264 / 2.2 = 120 items.",
     "dateAdded": "2025-02-11",
     "attempts": [
-      "2025-02-11"
+      {
+        "date": "2025-02-11",
+        "result": "pass"
+      }
     ]
   },
   {
@@ -16,7 +19,10 @@
     "solution": "Example 1: 81^(5/4) — 4th root of 81 = 3, then 3⁵ = 243.\nExample 2: 32^(3/5) — 5th root of 32 = 2, then 2³ = 8.",
     "dateAdded": "2026-03-07",
     "attempts": [
-      "2026-03-07"
+      {
+        "date": "2026-03-07",
+        "result": "pass"
+      }
     ]
   },
   {
@@ -26,7 +32,10 @@
     "solution": "Example 1: C(8,3) = 8! / (3!·5!) = (8×7×6) / (3×2×1) = 56.\nExample 2: C(10,4) = 10! / (4!·6!) = (10×9×8×7) / (4×3×2×1) = 210.",
     "dateAdded": "2026-03-08",
     "attempts": [
-      "2026-03-08"
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
     ]
   },
   {
@@ -36,7 +45,10 @@
     "solution": "Example 1: ½|1(1−5) + 4(5−1) + 4(1−1)| = ½|−4 + 16 + 0| = ½(12) = 6.\nExample 2: ½|0(0−4) + 4(3−0) + 3(4−0) + 1(0−3)| = ½|0 + 12 + 12 − 3| = ½(21) = 10.5.",
     "dateAdded": "2026-03-08",
     "attempts": [
-      "2026-03-08"
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
     ]
   },
   {
@@ -46,7 +58,10 @@
     "solution": "Think in residues mod 3: {0, 1, 2}. \"No two adjacent sum to 0 mod 3\" bans pairs (0,0), (1,2), (2,1). So adjacent numbers must share the same nonzero residue, or one is 0 and the other nonzero.\n\nOriginal (5 on circle): The 0-residues can't be adjacent. Working through: exactly 2 must be divisible by 3. Answer: C.\n\nExample 2 (7 on circle): Same logic — 2 must be divisible by 3.\n\nExample 3 (4 on circle): If all four ≡ 0 mod 3, every adjacent pair sums to 0 mod 3. So no — at most 2 of 4 can be divisible by 3.",
     "dateAdded": "2026-03-08",
     "attempts": [
-      "2026-03-08"
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
     ]
   }
 ]

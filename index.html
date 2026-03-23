@@ -38,7 +38,7 @@ const DEFAULT_QUESTIONS = [
     notes: "",
     solution: "Let x = total items. Tiles = 0.4x, cards = 0.6x.\nSymbols: 0.6x \u00d7 1 + 0.4x \u00d7 4 = 0.6x + 1.6x = 2.2x = 264\nx = 264 / 2.2 = 120 items.",
     dateAdded: "2025-02-11",
-    attempts: ["2025-02-11"],
+    attempts: [{ date: "2025-02-11", result: "pass" }],
   },
   {
     id: 2,
@@ -46,7 +46,7 @@ const DEFAULT_QUESTIONS = [
     notes: "Fractional exponents \u2014 numerator is power, denominator is root. Related to discomfort with \u221a3\u00b3 on AMC 8 2025 Q8.",
     solution: "Example 1: 81^(5/4) \u2014 4th root of 81 = 3, then 3\u2075 = 243.\nExample 2: 32^(3/5) \u2014 5th root of 32 = 2, then 2\u00b3 = 8.",
     dateAdded: "2026-03-07",
-    attempts: ["2026-03-07"],
+    attempts: [{ date: "2026-03-07", result: "pass" }],
   },
   {
     id: 3,
@@ -54,7 +54,7 @@ const DEFAULT_QUESTIONS = [
     notes: "Combination formula \u2014 distinguish from permutations (where order matters). Related to Pascal's triangle.",
     solution: "Example 1: C(8,3) = 8! / (3!\u00b75!) = (8\u00d77\u00d76) / (3\u00d72\u00d71) = 56.\nExample 2: C(10,4) = 10! / (4!\u00b76!) = (10\u00d79\u00d78\u00d77) / (4\u00d73\u00d72\u00d71) = 210.",
     dateAdded: "2026-03-08",
-    attempts: ["2026-03-08"],
+    attempts: [{ date: "2026-03-08", result: "pass" }],
   },
   {
     id: 4,
@@ -62,7 +62,7 @@ const DEFAULT_QUESTIONS = [
     notes: "Shoelace formula \u2014 useful when vertices are given as coordinates. Cross-multiply diagonals down-right and down-left, subtract, halve. Also called the surveyor's formula.",
     solution: "Example 1: \u00bd|1(1\u22125) + 4(5\u22121) + 4(1\u22121)| = \u00bd|\u22124 + 16 + 0| = \u00bd(12) = 6.\nExample 2: \u00bd|0(0\u22124) + 4(3\u22120) + 3(4\u22120) + 1(0\u22123)| = \u00bd|0 + 12 + 12 \u2212 3| = \u00bd(21) = 10.5.",
     dateAdded: "2026-03-08",
-    attempts: ["2026-03-08"],
+    attempts: [{ date: "2026-03-08", result: "pass" }],
   },
   {
     id: 5,
@@ -70,7 +70,7 @@ const DEFAULT_QUESTIONS = [
     notes: "Modular arithmetic on circular arrangements. Think in residues mod 3 \u2014 constraint forces a pattern on the residues.",
     solution: "Think in residues mod 3: {0, 1, 2}. \"No two adjacent sum to 0 mod 3\" bans pairs (0,0), (1,2), (2,1). So adjacent numbers must share the same nonzero residue, or one is 0 and the other nonzero.\n\nOriginal (5 on circle): The 0-residues can't be adjacent. Working through: exactly 2 must be divisible by 3. Answer: C.\n\nExample 2 (7 on circle): Same logic \u2014 2 must be divisible by 3.\n\nExample 3 (4 on circle): If all four \u2261 0 mod 3, every adjacent pair sums to 0 mod 3. So no \u2014 at most 2 of 4 can be divisible by 3.",
     dateAdded: "2026-03-08",
-    attempts: ["2026-03-08"],
+    attempts: [{ date: "2026-03-08", result: "pass" }],
   },
 ];
 
@@ -90,10 +90,21 @@ const fmtDate = (iso) =>
 
 const getInterval = (n) => (n <= 1 ? 3 : n === 2 ? 7 : n === 3 ? 14 : 30);
 
+// Normalize attempt: string → {date, result} for migration from old format
+const normAttempt = (a) => typeof a === "string" ? { date: a, result: "pass" } : a;
+
 function getDue(q) {
-  if (!q.attempts.length) return { due: true, ago: null, next: 3 };
-  const ago = daysBetween(q.attempts[q.attempts.length - 1], TODAY);
-  const next = getInterval(q.attempts.length);
+  const attempts = q.attempts.map(normAttempt);
+  if (!attempts.length) return { due: true, ago: null, next: 3 };
+  const last = attempts[attempts.length - 1];
+  const ago = daysBetween(last.date, TODAY);
+  // Count consecutive passes from the end; a fail resets to 0
+  let streak = 0;
+  for (let i = attempts.length - 1; i >= 0; i--) {
+    if (attempts[i].result === "pass") streak++;
+    else break;
+  }
+  const next = getInterval(streak);
   return { due: ago >= next, ago, next };
 }
 
@@ -121,10 +132,11 @@ function mergeDefaults(loaded) {
     }
     return merged;
   });
-  // Add entirely new defaults not yet in storage
+  // Add entirely new defaults not yet in storage — keep original ids when possible
   let maxId = updated.reduce((m, q) => Math.max(m, q.id), 0);
+  const usedIds = new Set(updated.map((q) => q.id));
   const missing = DEFAULT_QUESTIONS.filter((d) => !matchedDefaultIds.has(d.id));
-  const merged = [...updated, ...missing.map((d) => ({ ...d, id: ++maxId }))];
+  const merged = [...updated, ...missing.map((d) => usedIds.has(d.id) ? { ...d, id: ++maxId } : d)];
   // Deduplicate by question text — keeps first occurrence (the id-matched one),
   // removes orphan duplicates left by old text-based matching
   const seenText = new Set();
@@ -155,6 +167,11 @@ async function storageLoad() {
       }
     } catch {}
   }
+  // Migrate old string-based attempts to {date, result} objects
+  qs = qs.map((q) => ({
+    ...q,
+    attempts: (q.attempts || []).map(normAttempt),
+  }));
   return mergeDefaults(qs);
 }
 
@@ -245,7 +262,7 @@ function SpacedRepTracker() {
 
   const doAdd = async () => {
     if (!addQ.trim()) return;
-    const q = { id: nextId(qs), question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [TODAY] };
+    const q = { id: nextId(qs), question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [{ date: TODAY, result: "pass" }] };
     const updated = [...qs, q];
     setQs(updated);
     await save(updated);
@@ -254,10 +271,19 @@ function SpacedRepTracker() {
     setTab("all");
   };
 
-  const doAttempt = async (id) => {
-    const updated = qs.map((q) =>
-      q.id === id ? { ...q, attempts: q.attempts.includes(TODAY) ? q.attempts : [...q.attempts, TODAY] } : q
-    );
+  const hasAttemptToday = (q) => q.attempts.some((a) => normAttempt(a).date === TODAY);
+
+  const doAttempt = async (id, result) => {
+    const updated = qs.map((q) => {
+      if (q.id !== id) return q;
+      const todayIdx = q.attempts.findIndex((a) => normAttempt(a).date === TODAY);
+      if (todayIdx >= 0) {
+        const newAttempts = [...q.attempts];
+        newAttempts[todayIdx] = { date: TODAY, result };
+        return { ...q, attempts: newAttempts };
+      }
+      return { ...q, attempts: [...q.attempts, { date: TODAY, result }] };
+    });
     setQs(updated);
     await save(updated);
   };
@@ -344,8 +370,8 @@ function SpacedRepTracker() {
 
   const sorted = [...searched].sort((a, b) => {
     if (sort === "stalest") {
-      const aL = a.attempts.length ? a.attempts[a.attempts.length - 1] : "0000";
-      const bL = b.attempts.length ? b.attempts[b.attempts.length - 1] : "0000";
+      const aL = a.attempts.length ? normAttempt(a.attempts[a.attempts.length - 1]).date : "0000";
+      const bL = b.attempts.length ? normAttempt(b.attempts[b.attempts.length - 1]).date : "0000";
       return aL < bL ? -1 : aL > bL ? 1 : 0;
     }
     if (sort === "oldest") return a.dateAdded < b.dateAdded ? -1 : 1;
@@ -452,7 +478,8 @@ function SpacedRepTracker() {
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {sorted.map((q) => {
               const { due, ago, next } = getDue(q);
-              const doneToday = q.attempts.includes(TODAY);
+              const doneToday = hasAttemptToday(q);
+              const todayResult = doneToday ? q.attempts.map(normAttempt).find((a) => a.date === TODAY)?.result : null;
               const isExp = expanded === q.id;
               const isDel = delConfirm === q.id;
               const isEditing = editing?.id === q.id;
@@ -487,9 +514,9 @@ function SpacedRepTracker() {
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
                       <div style={{ fontFamily: MONO, fontSize: 12, fontWeight: 500, padding: "2px 8px", borderRadius: 4,
-                        background: due ? C.warn + "22" : doneToday ? C.good + "22" : C.bg,
-                        color: due ? C.warn : doneToday ? C.good : C.dim }}>
-                        {agoLabel(ago)}
+                        background: due ? C.warn + "22" : todayResult === "pass" ? C.good + "22" : todayResult === "fail" ? C.danger + "22" : C.bg,
+                        color: due && !doneToday ? C.warn : todayResult === "pass" ? C.good : todayResult === "fail" ? C.danger : C.dim }}>
+                        {doneToday ? (todayResult === "pass" ? "✓ today" : "✗ today") : agoLabel(ago)}
                       </div>
                       <div style={{ fontFamily: MONO, fontSize: 10, color: C.dim }}>{q.attempts.length}x · {next}d</div>
                     </div>
@@ -502,7 +529,12 @@ function SpacedRepTracker() {
                         <div>
                           Attempts ({q.attempts.length}):{" "}
                           {q.attempts.length
-                            ? q.attempts.map((a) => `${fmtDate(a)} (${daysBetween(a, TODAY) === 0 ? "today" : daysBetween(a, TODAY) + "d ago"})`).join(", ")
+                            ? q.attempts.map(normAttempt).map((a) => {
+                                const d = daysBetween(a.date, TODAY);
+                                const icon = a.result === "pass" ? "✓" : "✗";
+                                const color = a.result === "pass" ? C.good : C.danger;
+                                return <span key={a.date + a.result} style={{ color }}>{icon}{fmtDate(a.date)} ({d === 0 ? "today" : d + "d ago"})</span>;
+                              }).reduce((acc, el, i) => i === 0 ? [el] : [...acc, ", ", el], [])
                             : "none"}
                         </div>
                         <div style={{ marginTop: 2 }}>Added {fmtDate(q.dateAdded)} · Next interval: {next}d</div>
@@ -529,10 +561,15 @@ function SpacedRepTracker() {
                         </div>
                       ) : (
                         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                          <button onClick={(e) => { e.stopPropagation(); doAttempt(q.id); }} disabled={doneToday}
-                            style={{ ...btn(doneToday ? C.card : C.accent, doneToday ? C.dim : "#fff"),
-                              opacity: doneToday ? 0.5 : 1, cursor: doneToday ? "default" : "pointer" }}>
-                            {doneToday ? "Done today" : "Mark attempted"}
+                          <button onClick={(e) => { e.stopPropagation(); doAttempt(q.id, "pass"); }}
+                            style={{ ...btn(todayResult === "pass" ? C.good + "33" : C.good, todayResult === "pass" ? C.good : "#fff"),
+                              cursor: "pointer" }}>
+                            {todayResult === "pass" ? "✓ Got it" : "✓ Got it"}
+                          </button>
+                          <button onClick={(e) => { e.stopPropagation(); doAttempt(q.id, "fail"); }}
+                            style={{ ...btn(todayResult === "fail" ? C.danger + "33" : C.danger, todayResult === "fail" ? C.danger : "#fff"),
+                              cursor: "pointer" }}>
+                            {todayResult === "fail" ? "✗ Missed" : "✗ Missed it"}
                           </button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "question"); }} style={btn(C.card, C.dim)}>Edit Q</button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "notes"); }} style={btn(C.card, C.dim)}>Edit Notes</button>
