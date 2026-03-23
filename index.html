@@ -100,22 +100,30 @@ function getDue(q) {
 const agoLabel = (d) => (d === null ? "new" : d === 0 ? "today" : `${d}d ago`);
 
 function mergeDefaults(loaded) {
-  // Backfill missing fields from defaults onto existing questions
+  const defaultsById = new Map(DEFAULT_QUESTIONS.map((d) => [d.id, d]));
   const defaultsByText = new Map(DEFAULT_QUESTIONS.map((d) => [d.question.trim(), d]));
+  const matchedDefaultIds = new Set();
+
   const updated = loaded.map((q) => {
-    const def = defaultsByText.get(q.question.trim());
+    // Match by id first (handles edited question text), then fall back to text match
+    const def = defaultsById.get(q.id) || defaultsByText.get(q.question.trim());
     if (!def) return q;
+    matchedDefaultIds.add(def.id);
     const merged = { ...q };
     for (const key of Object.keys(def)) {
       if (key === "id") continue;
-      if (merged[key] === undefined) merged[key] = def[key];
+      // Overwrite question/solution/notes from defaults (allows edits to propagate)
+      if (key === "question" || key === "solution" || key === "notes") {
+        merged[key] = def[key];
+      } else if (merged[key] === undefined) {
+        merged[key] = def[key];
+      }
     }
     return merged;
   });
   // Add entirely new defaults not yet in storage
-  const seen = new Set(updated.map((q) => q.question.trim()));
   let maxId = updated.reduce((m, q) => Math.max(m, q.id), 0);
-  const missing = DEFAULT_QUESTIONS.filter((d) => !seen.has(d.question.trim()));
+  const missing = DEFAULT_QUESTIONS.filter((d) => !matchedDefaultIds.has(d.id));
   return [...updated, ...missing.map((d) => ({ ...d, id: ++maxId }))];
 }
 
