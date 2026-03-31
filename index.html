@@ -150,6 +150,10 @@ const TODAY = new Date().toISOString().split("T")[0];
 const STORAGE_KEY = "fufu-spaced-rep-v1";
 const BACKUP_KEY = "fufu-spaced-rep-v1-backup";
 const EXPORT_REMINDER_KEY = "fufu-last-exported";
+const GH_TOKEN_KEY = "fufu-gh-token";
+const GH_OWNER = "grrarr";
+const GH_REPO = "fufu-spaced-rep";
+const GH_DATA_PATH = "data/progress.json";
 
 // ── Utilities ────────────────────────────────────────────────────────────────
 
@@ -259,6 +263,40 @@ async function storageSave(qs, prevCount) {
   } catch {}
 }
 
+// ── GitHub sync helpers ───────────────────────────────────────────────────────
+
+async function ghFetch(token) {
+  try {
+    const headers = { Accept: "application/vnd.github.v3+json" };
+    if (token) headers.Authorization = `token ${token}`;
+    const r = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_PATH}`,
+      { headers }
+    );
+    if (!r.ok) return null;
+    const d = await r.json();
+    const parsed = JSON.parse(atob(d.content.replace(/\n/g, "")));
+    const qs = Array.isArray(parsed) ? parsed : parsed.questions;
+    return Array.isArray(qs) ? { questions: qs, sha: d.sha } : null;
+  } catch { return null; }
+}
+
+async function ghWrite(token, qs, sha) {
+  const content = btoa(unescape(encodeURIComponent(
+    JSON.stringify({ version: 1, updated: TODAY, questions: qs }, null, 2)
+  )));
+  const r = await fetch(
+    `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_PATH}`,
+    {
+      method: "PUT",
+      headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json", "Content-Type": "application/json" },
+      body: JSON.stringify({ message: `Update progress ${TODAY}`, content, ...(sha ? { sha } : {}) }),
+    }
+  );
+  if (!r.ok) throw new Error(r.status);
+  return (await r.json()).content.sha;
+}
+
 // ── Theme ────────────────────────────────────────────────────────────────────
 
 const C = {
@@ -307,6 +345,11 @@ function SpacedRepTracker() {
   const [showSolution, setShowSolution] = useState(null);
   const fileRef = useRef(null);
   const prevCountRef = useRef(0);
+  const ghTokenRef = useRef("");
+  const ghShaRef = useRef(null);
+  const [ghStatus, setGhStatus] = useState("idle"); // idle | loading | synced | saving | error
+  const [showGhSetup, setShowGhSetup] = useState(false);
+  const [tokenDraft, setTokenDraft] = useState("");
 
   const flash = useCallback((msg) => {
     setToast(msg);
@@ -316,11 +359,50 @@ function SpacedRepTracker() {
   const save = useCallback(async (newQs) => {
     await storageSave(newQs, prevCountRef.current);
     prevCountRef.current = newQs.length;
+    const token = ghTokenRef.current;
+    if (token) {
+      setGhStatus("saving");
+      try {
+        let sha = ghShaRef.current;
+        if (!sha) {
+          const existing = await ghFetch(token);
+          sha = existing?.sha || null;
+        }
+        const newSha = await ghWrite(token, newQs, sha);
+        ghShaRef.current = newSha;
+        setGhStatus("synced");
+      } catch { setGhStatus("error"); }
+    }
   }, []);
 
   useEffect(() => {
     (async () => {
-      const loaded = await storageLoad();
+      // Load GitHub token
+      let token = "";
+      try {
+        const r = await window.storage.get(GH_TOKEN_KEY);
+        if (r?.value) { token = r.value; ghTokenRef.current = r.value; }
+      } catch {}
+
+      // Try GitHub first
+      let loaded;
+      if (token) {
+        setGhStatus("loading");
+        const ghResult = await ghFetch(token);
+        if (ghResult) {
+          ghShaRef.current = ghResult.sha;
+          setGhStatus("synced");
+          loaded = mergeDefaults(ghResult.questions.map((q) => ({
+            ...q, attempts: (q.attempts || []).map(normAttempt),
+          })));
+        } else {
+          setGhStatus("error");
+        }
+      }
+
+      // Fall back to localStorage
+      if (!loaded) loaded = await storageLoad();
+
       setQs(loaded);
       prevCountRef.current = loaded.length;
       await storageSave(loaded, 0);
@@ -426,6 +508,36 @@ function SpacedRepTracker() {
     e.target.value = "";
   };
 
+  const doSaveToken = async () => {
+    const t = tokenDraft.trim();
+    if (!t) return;
+    await window.storage.set(GH_TOKEN_KEY, t);
+    ghTokenRef.current = t;
+    setShowGhSetup(false);
+    setTokenDraft("");
+    setGhStatus("saving");
+    try {
+      const existing = await ghFetch(t);
+      const sha = existing?.sha || null;
+      const newSha = await ghWrite(t, qs, sha);
+      ghShaRef.current = newSha;
+      setGhStatus("synced");
+      flash("Connected to GitHub");
+    } catch {
+      setGhStatus("error");
+      flash("Token saved, but sync failed — check PAT permissions");
+    }
+  };
+
+  const doClearToken = async () => {
+    await window.storage.set(GH_TOKEN_KEY, "");
+    ghTokenRef.current = "";
+    ghShaRef.current = null;
+    setGhStatus("idle");
+    setShowGhSetup(false);
+    flash("GitHub sync disabled");
+  };
+
   // ── Derived ──
 
   const dueQs = qs.filter((q) => getDue(q).due);
@@ -489,12 +601,43 @@ function SpacedRepTracker() {
               <span style={{ color: dueQs.length ? C.warn : C.dim }}>{dueQs.length} due</span>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 6 }}>
-            <button onClick={doExport} style={btn(C.card, C.dim)} title="Download JSON">Export</button>
-            <button onClick={() => fileRef.current?.click()} style={btn(C.card, C.dim)}>Import</button>
+          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <button onClick={doExport} style={btn(C.card, C.dim)} title="Download JSON backup">Export</button>
+            <button onClick={() => fileRef.current?.click()} style={btn(C.card, C.dim)} title="Import from JSON file">Import</button>
             <input ref={fileRef} type="file" accept=".json" onChange={doImport} style={{ display: "none" }} />
+            <button
+              onClick={() => setShowGhSetup(!showGhSetup)}
+              style={btn(C.card, ghStatus === "synced" ? C.good : ghStatus === "error" ? C.danger : ghStatus === "loading" || ghStatus === "saving" ? C.warn : C.dim)}
+              title={ghStatus === "synced" ? "Synced to GitHub" : ghStatus === "error" ? "GitHub sync error" : "Set up GitHub sync"}
+            >
+              {ghStatus === "saving" ? "Saving…" : ghStatus === "loading" ? "Loading…" : ghStatus === "synced" ? "● GH" : ghStatus === "error" ? "⚠ GH" : "GH"}
+            </button>
           </div>
         </div>
+
+        {/* GitHub setup panel */}
+        {showGhSetup && (
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, padding: "10px 12px", marginBottom: 10 }}>
+            <div style={{ fontSize: 12, color: C.dim, fontFamily: MONO, marginBottom: 6 }}>
+              GitHub Personal Access Token — grants cross-browser sync via {GH_DATA_PATH}
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+              <input
+                value={tokenDraft}
+                onChange={(e) => setTokenDraft(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && doSaveToken()}
+                placeholder="ghp_..."
+                type="password"
+                style={{ ...inputStyle, flex: 1, minWidth: 160, fontSize: 13, padding: "5px 10px" }}
+              />
+              <button onClick={doSaveToken} disabled={!tokenDraft.trim()} style={{ ...btn(C.accent), opacity: tokenDraft.trim() ? 1 : 0.4 }}>Save</button>
+              {ghTokenRef.current && <button onClick={doClearToken} style={btn(C.card, C.danger)}>Disconnect</button>}
+            </div>
+            <div style={{ fontSize: 11, color: C.dim, fontFamily: MONO, marginTop: 6 }}>
+              Create at github.com/settings/tokens — needs Contents: Read &amp; Write on this repo
+            </div>
+          </div>
+        )}
 
         {/* Export warning */}
         {expWarn && (
