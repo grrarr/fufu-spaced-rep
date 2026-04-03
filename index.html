@@ -384,20 +384,18 @@ function SpacedRepTracker() {
         if (r?.value) { token = r.value; ghTokenRef.current = r.value; }
       } catch {}
 
-      // Try GitHub first
+      // Try GitHub first (public read works without token; token enables write-back)
       let loaded;
-      if (token) {
-        setGhStatus("loading");
-        const ghResult = await ghFetch(token);
-        if (ghResult) {
-          ghShaRef.current = ghResult.sha;
-          setGhStatus("synced");
-          loaded = mergeDefaults(ghResult.questions.map((q) => ({
-            ...q, attempts: (q.attempts || []).map(normAttempt),
-          })));
-        } else {
-          setGhStatus("error");
-        }
+      setGhStatus("loading");
+      const ghResult = await ghFetch(token || null);
+      if (ghResult) {
+        ghShaRef.current = ghResult.sha;
+        setGhStatus(token ? "synced" : "idle");
+        loaded = mergeDefaults(ghResult.questions.map((q) => ({
+          ...q, attempts: (q.attempts || []).map(normAttempt),
+        })));
+      } else {
+        setGhStatus(token ? "error" : "idle");
       }
 
       // Fall back to localStorage

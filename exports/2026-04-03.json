@@ -1,0 +1,174 @@
+[
+  {
+    "id": 1,
+    "question": "A game collection contains only cards and tiles. Each card shows 1 symbol, and each tile shows 4 symbols. Exactly 40% of the collection are tiles. If there are 264 symbols altogether, how many items are in the collection?",
+    "notes": "",
+    "solution": "Let x = total items. Tiles = 0.4x, cards = 0.6x.\nSymbols: 0.6x × 1 + 0.4x × 4 = 0.6x + 1.6x = 2.2x = 264\nx = 264 / 2.2 = 120 items.",
+    "dateAdded": "2025-02-11",
+    "attempts": [
+      {
+        "date": "2025-02-11",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "question": "X^(a/b) means: take the b-th root of X, then raise to the a-th power. Equivalently, (ᵇ√X)ᵃ.\n\nExample 1: What is 81^(5/4)?\nExample 2: What is 32^(3/5)?",
+    "notes": "Fractional exponents — numerator is power, denominator is root. Related to discomfort with √3³ on AMC 8 2025 Q8.",
+    "solution": "Example 1: 81^(5/4) — 4th root of 81 = 3, then 3⁵ = 243.\nExample 2: 32^(3/5) — 5th root of 32 = 2, then 2³ = 8.",
+    "dateAdded": "2026-03-07",
+    "attempts": [
+      {
+        "date": "2026-03-07",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "question": "C(n, k) = n! / (k! · (n−k)!) counts the number of ways to choose k items from n, where order doesn't matter.\n\nExample 1: How many ways can you choose 3 students from a group of 8?\nExample 2: A pizza menu offers 10 toppings. How many different 4-topping pizzas can you make?",
+    "notes": "Combination formula — distinguish from permutations (where order matters). Related to Pascal's triangle.",
+    "solution": "Example 1: C(8,3) = 8! / (3!·5!) = (8×7×6) / (3×2×1) = 56.\nExample 2: C(10,4) = 10! / (4!·6!) = (10×9×8×7) / (4×3×2×1) = 210.",
+    "dateAdded": "2026-03-08",
+    "attempts": [
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "question": "The Shoelace Theorem finds the area of a polygon from its vertex coordinates. List vertices in order, then compute:\nArea = ½ |x₁(y₂−yₙ) + x₂(y₃−y₁) + x₃(y₄−y₂) + ... + xₙ(y₁−yₙ₋₁)|\n\nExample 1: Find the area of the triangle with vertices (1, 1), (4, 1), (4, 5).\nExample 2: Find the area of the quadrilateral with vertices (0, 0), (4, 0), (3, 3), (1, 4).",
+    "notes": "Shoelace formula — useful when vertices are given as coordinates. Cross-multiply diagonals down-right and down-left, subtract, halve. Also called the surveyor's formula.",
+    "solution": "Example 1: ½|1(1−5) + 4(5−1) + 4(1−1)| = ½|−4 + 16 + 0| = ½(12) = 6.\nExample 2: ½|0(0−4) + 4(3−0) + 3(4−0) + 1(0−3)| = ½|0 + 12 + 12 − 3| = ½(21) = 10.5.",
+    "dateAdded": "2026-03-08",
+    "attempts": [
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "question": "Five integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many of these five numbers are divisible by 3?\nA) 0   B) 1   C) 2   D) 3   E) Impossible to determine\n\nExample 2: Seven integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many must be divisible by 3?\nExample 3: Four integers are written around a circle so that no two adjacent numbers have a sum divisible by 3. Can all four be divisible by 3?",
+    "notes": "Modular arithmetic on circular arrangements. Think in residues mod 3 — constraint forces a pattern on the residues.",
+    "solution": "Think in residues mod 3: {0, 1, 2}. \"No two adjacent sum to 0 mod 3\" bans pairs (0,0), (1,2), (2,1). So adjacent numbers must share the same nonzero residue, or one is 0 and the other nonzero.\n\nOriginal (5 on circle): The 0-residues can't be adjacent. Working through: exactly 2 must be divisible by 3. Answer: C.\n\nExample 2 (7 on circle): Same logic — 2 must be divisible by 3.\n\nExample 3 (4 on circle): If all four ≡ 0 mod 3, every adjacent pair sums to 0 mod 3. So no — at most 2 of 4 can be divisible by 3.",
+    "dateAdded": "2026-03-08",
+    "attempts": [
+      {
+        "date": "2026-03-08",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "question": "The sum of interior angles of an n-sided polygon is (n − 2) × 180°.\n\nExample 1: What is the sum of interior angles of a hexagon (6 sides)?\nExample 2: A polygon has interior angles that sum to 1440°. How many sides does it have?\nExample 3: What is each interior angle of a regular decagon (10 sides)?",
+    "notes": "Fundamental polygon angle formula. Derived by splitting any n-gon into (n − 2) triangles from one vertex. For regular polygons, each angle = (n − 2) × 180° / n.",
+    "solution": "Example 1: n = 6. Sum = (6 − 2) × 180° = 4 × 180° = 720°.\nExample 2: (n − 2) × 180 = 1440 → n − 2 = 8 → n = 10. It's a decagon.\nExample 3: n = 10. Sum = (10 − 2) × 180° = 1440°. Each angle = 1440° / 10 = 144°.",
+    "dateAdded": "2026-03-23",
+    "attempts": [
+      {
+        "date": "2026-03-23",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Simplifying √(c + d√n)",
+    "question": "Step 1: Expand (p + q√2)². What form does the result take?\n\nStep 2: Now simplify √(3 + 2√2). (Hint: your answer to Step 1 tells you what form to guess.)\n\nExample 2: Simplify √(5 − 2√6).",
+    "notes": "Christopher needs to discover the a + b√n form himself by squaring first, rather than being told the answer format. Step 1 builds the mental model, Step 2 applies it.",
+    "solution": "Step 1: (p + q√2)² = p² + 2pq√2 + 2q². This is (p² + 2q²) + 2pq√2 — a rational part plus an irrational part. So the square root of something in that form should give back p + q√2.\n\nStep 2: √(3 + 2√2). From Step 1, guess (p + q√2)² = 3 + 2√2. Match: p² + 2q² = 3 and 2pq = 2, so pq = 1. Try p = 1, q = 1: 1 + 2 = 3 ✓. Answer: 1 + √2.\n\nExample 2: √(5 − 2√6). Guess (√a − √b)². Try (√3 − √2)² = 3 + 2 − 2√6 = 5 − 2√6 ✓. Answer: √3 − √2.",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Breaking up nth roots: ⁿ√(ab)",
+    "question": "Simplify each expression by breaking it into separate roots.\n\nExample 1: ³√(8 × 27)\nExample 2: √(50)\nExample 3: ⁴√(16 × 81)",
+    "notes": "Tests whether Christopher remembers that ⁿ√(a·b) = ⁿ√a × ⁿ√b. The question deliberately does NOT state the rule — he should recall and apply it himself.",
+    "solution": "Key rule: ⁿ√(a·b) = ⁿ√a × ⁿ√b.\n\nExample 1: ³√(8 × 27) = ³√8 × ³√27 = 2 × 3 = 6.\nExample 2: √50 = √(25 × 2) = √25 × √2 = 5√2.\nExample 3: ⁴√(16 × 81) = ⁴√16 × ⁴√81 = 2 × 3 = 6.",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Negative exponents: 1/aⁿ = a⁻ⁿ",
+    "question": "Rewrite each expression as a single power (with a possibly negative exponent).\n\nExample 1: 1/5³ = 5^?\nExample 2: 1/2⁴ = 2^?\nExample 3: (1/4)⁴ — rewrite everything as a power of 2.\nExample 4: (1/3)⁵ — rewrite as a power of 3.",
+    "notes": "Christopher had major trouble seeing that 1/4 = 2⁻² (and therefore working with negative exponents). This drills the key identity 1/aⁿ = a⁻ⁿ, then applies it in multi-step problems like (1/4)⁴ = 2^x.",
+    "solution": "Key rule: 1/aⁿ = a⁻ⁿ.\n\nExample 1: 1/5³ = 5⁻³.\nExample 2: 1/2⁴ = 2⁻⁴.\nExample 3: (1/4)⁴. First, 1/4 = 4⁻¹ = (2²)⁻¹ = 2⁻². So (1/4)⁴ = (2⁻²)⁴ = 2⁻⁸.\nExample 4: (1/3)⁵ = (3⁻¹)⁵ = 3⁻⁵.",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Arithmetic mean vs. geometric mean",
+    "question": "Part A: Define the geometric mean.\n— For two numbers a and b, the geometric mean is ___.\n— For three numbers a, b, and c, the geometric mean is ___.\n\nPart B: For positive numbers, which is always greater — the arithmetic mean or the geometric mean? Is there any exception?\n\nExample: Compute both means for {2, 8}. Then for {5, 5}.",
+    "notes": "AM-GM inequality is a classic competition tool. Key caveat: AM ≥ GM always, with equality only when all numbers are the same. Christopher should know both the definitions and the inequality.",
+    "solution": "Part A:\n— For a, b: geometric mean = √(a·b).\n— For a, b, c: geometric mean = ³√(a·b·c).\n— In general for a₁…aₙ: geometric mean = ⁿ√(a₁·a₂·…·aₙ).\n\nPart B: The arithmetic mean is always ≥ the geometric mean (AM-GM inequality). They are equal ONLY when all the numbers are the same.\n\nExample {2, 8}: AM = (2+8)/2 = 5. GM = √(2·8) = √16 = 4. AM > GM ✓.\nExample {5, 5}: AM = 5. GM = √(5·5) = 5. AM = GM (equal because the numbers are the same).",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Nested radical expressions",
+    "question": "Simplify each expression to a single number.\n\nExample 1: [√((√5)³)]⁴\nExample 2: [√((√3)⁵)]²\nExample 3: [³√((√2)⁹)]²",
+    "notes": "Based on AMC 8 2025 Q5 style — nested radicals with an outer exponent. Convert everything to fractional exponents and multiply. Christopher should practice chaining exponent rules on radicals.",
+    "solution": "Convert to exponents and simplify.\n\nExample 1: √((√5)³) = ((5^(1/2))³)^(1/2) = (5^(3/2))^(1/2) = 5^(3/4). Then to the 4th power: 5^(3/4 × 4) = 5³ = 125.\n\nExample 2: √((√3)⁵) = ((3^(1/2))⁵)^(1/2) = (3^(5/2))^(1/2) = 3^(5/4). Then squared: 3^(5/4 × 2) = 3^(5/2) = 9√3.\n\nExample 3: ³√((√2)⁹) = ((2^(1/2))⁹)^(1/3) = (2^(9/2))^(1/3) = 2^(3/2). Then squared: 2^(3/2 × 2) = 2³ = 8.",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "title": "Distributing exponents: (ab)ⁿ = aⁿ × bⁿ",
+    "question": "Expand and simplify. Remember: when raising a product to a power, the exponent applies to EVERY factor.\n\nExample 1: (5 × ³√2)³\nExample 2: (4 × √3)²\nExample 3: (2 × ⁵√7)⁵",
+    "notes": "Christopher made the error of only cubing the radical part and forgetting to cube the coefficient (e.g., computing 6 × (³√3)³ = 6 × 3 = 18 instead of 6³ × 3 = 648). This drills the rule (a·b)ⁿ = aⁿ · bⁿ.",
+    "solution": "Key rule: (a · b)ⁿ = aⁿ · bⁿ — the exponent hits EVERY factor.\n\nExample 1: (5 × ³√2)³ = 5³ × (³√2)³ = 125 × 2 = 250.\n\nExample 2: (4 × √3)² = 4² × (√3)² = 16 × 3 = 48.\n\nExample 3: (2 × ⁵√7)⁵ = 2⁵ × (⁵√7)⁵ = 32 × 7 = 224.\n\nGeneral form: (a · b)ⁿ = aⁿ · bⁿ. Never raise only one factor!",
+    "dateAdded": "2026-03-26",
+    "attempts": [
+      {
+        "date": "2026-03-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "question": "For x² + ax + b = 0, express a and b in terms of the roots.\n\nExample 1: roots are 3 and 5 → find a and b\nExample 2: roots are −2 and 7 → find a and b\nExample 3: roots are −4 and −1 → find a and b\n\n(Rederive if needed: factor as (x − r₁)(x − r₂) and expand.)",
+    "notes": "Vieta's formulas for monic quadratics. Common mistake: forgetting the sign flip on a (it's negative the sum, not the sum).",
+    "solution": "a = −(sum of roots),  b = product of roots\n\nExample 1: a = −(3+5) = −8,  b = 3×5 = 15\nExample 2: a = −(−2+7) = −5,  b = −2×7 = −14\nExample 3: a = −(−4−1) = 5,  b = −4×(−1) = 4",
+    "dateAdded": "2026-03-29",
+    "attempts": [
+      "2026-03-29"
+    ]
+  }
+]
