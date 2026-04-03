@@ -175,7 +175,7 @@
     "id": 14,
     "question": "For ax² + bx + c = 0, what are the sum and product of the roots?\n\nDerive from: ax² + bx + c = a(x − r₁)(x − r₂).\n\nExample: 2x² − 6x + 4 = 0",
     "notes": "Vieta's formulas for general quadratics. Extends the monic version (Q13) — divide by a.",
-    "solution": "Derive: a(x − r₁)(x − r₂) = a[x² − (r₁+r₂)x + r₁r₂] = ax² − a(r₁+r₂)x + a·r₁r₂. So b = −a(r₁+r₂) and c = a·r₁r₂.\nSum = −b/a, Product = c/a\n\nExample: Sum = 6/2 = 3. Product = 4/2 = 2. (Roots: 1 and 2 ✓)",
+    "solution": "Derive: a(x − r₁)(x − r₂)\n= a[x² − r₂x − r₁x + r₁r₂]\n= a[x² − (r₁+r₂)x + r₁r₂]\n= ax² − a(r₁+r₂)x + a·r₁r₂\n\nCompare to ax² + bx + c:\nb = −a(r₁+r₂)  →  r₁+r₂ = −b/a\nc = a·r₁r₂  →  r₁r₂ = c/a\n\nSum = −b/a, Product = c/a\n\nExample: 2x² − 6x + 4 = 0. a=2, b=−6, c=4.\nSum = −(−6)/2 = 6/2 = 3.\nProduct = 4/2 = 2.\nVerify by factoring: 2(x−1)(x−2) = 0, roots are 1 and 2. Sum = 1+2 = 3 ✓. Product = 1×2 = 2 ✓.",
     "dateAdded": "2026-04-02",
     "attempts": [
       {
