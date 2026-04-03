@@ -403,7 +403,8 @@ function SpacedRepTracker() {
 
       setQs(loaded);
       prevCountRef.current = loaded.length;
-      await storageSave(loaded, 0);
+      // Don't save on load — only save on user actions (pass/fail/edit/add).
+      // This prevents a stale deploy from overwriting progress.json with old defaults.
       try {
         const r = await window.storage.get(EXPORT_REMINDER_KEY);
         if (r?.value) setLastExp(r.value);
