@@ -48,6 +48,7 @@ const DEFAULT_QUESTIONS = [
     id: 1,
     kind: "problem",
     tags: [],
+    source: "",
     question: "A game collection contains only cards and tiles. Each card shows 1 symbol, and each tile shows 4 symbols. Exactly 40% of the collection are tiles. If there are 264 symbols altogether, how many items are in the collection?",
     notes: "",
     solution: "Let x = total items. Tiles = 0.4x, cards = 0.6x.\nSymbols: 0.6x \u00d7 1 + 0.4x \u00d7 4 = 0.6x + 1.6x = 2.2x = 264\nx = 264 / 2.2 = 120 items.",
@@ -58,6 +59,7 @@ const DEFAULT_QUESTIONS = [
     id: 2,
     kind: "concept",
     tags: [],
+    source: "AMC 8 2025 Q8",
     question: "X^(a/b) means: take the b-th root of X, then raise to the a-th power. Equivalently, (\u1d47\u221aX)\u1d43.\n\nExample 1: What is 81^(5/4)?\nExample 2: What is 32^(3/5)?",
     notes: "Fractional exponents \u2014 numerator is power, denominator is root. Related to discomfort with \u221a3\u00b3 on AMC 8 2025 Q8.",
     solution: "Example 1: 81^(5/4) \u2014 4th root of 81 = 3, then 3\u2075 = 243.\nExample 2: 32^(3/5) \u2014 5th root of 32 = 2, then 2\u00b3 = 8.",
@@ -68,6 +70,7 @@ const DEFAULT_QUESTIONS = [
     id: 3,
     kind: "concept",
     tags: [],
+    source: "",
     question: "C(n, k) = n! / (k! \u00b7 (n\u2212k)!) counts the number of ways to choose k items from n, where order doesn't matter.\n\nExample 1: How many ways can you choose 3 students from a group of 8?\nExample 2: A pizza menu offers 10 toppings. How many different 4-topping pizzas can you make?",
     notes: "Combination formula \u2014 distinguish from permutations (where order matters). Related to Pascal's triangle.",
     solution: "Example 1: C(8,3) = 8! / (3!\u00b75!) = (8\u00d77\u00d76) / (3\u00d72\u00d71) = 56.\nExample 2: C(10,4) = 10! / (4!\u00b76!) = (10\u00d79\u00d78\u00d77) / (4\u00d73\u00d72\u00d71) = 210.",
@@ -78,6 +81,7 @@ const DEFAULT_QUESTIONS = [
     id: 4,
     kind: "concept",
     tags: [],
+    source: "",
     question: "The Shoelace Theorem finds the area of a polygon from its vertex coordinates. List vertices in order, then compute:\nArea = \u00bd |x\u2081(y\u2082\u2212y\u2099) + x\u2082(y\u2083\u2212y\u2081) + x\u2083(y\u2084\u2212y\u2082) + ... + x\u2099(y\u2081\u2212y\u2099\u208b\u2081)|\n\nExample 1: Find the area of the triangle with vertices (1, 1), (4, 1), (4, 5).\nExample 2: Find the area of the quadrilateral with vertices (0, 0), (4, 0), (3, 3), (1, 4).",
     notes: "Shoelace formula \u2014 useful when vertices are given as coordinates. Cross-multiply diagonals down-right and down-left, subtract, halve. Also called the surveyor's formula.",
     solution: "Example 1: \u00bd|1(1\u22125) + 4(5\u22121) + 4(1\u22121)| = \u00bd|\u22124 + 16 + 0| = \u00bd(12) = 6.\nExample 2: \u00bd|0(0\u22124) + 4(3\u22120) + 3(4\u22120) + 1(0\u22123)| = \u00bd|0 + 12 + 12 \u2212 3| = \u00bd(21) = 10.5.",
@@ -88,6 +92,7 @@ const DEFAULT_QUESTIONS = [
     id: 5,
     kind: "problem",
     tags: [],
+    source: "",
     question: "Five integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many of these five numbers are divisible by 3?\nA) 0   B) 1   C) 2   D) 3   E) Impossible to determine\n\nExample 2: Seven integers are written around a circle so that no two or three adjacent numbers have a sum divisible by 3. How many must be divisible by 3?\nExample 3: Four integers are written around a circle so that no two adjacent numbers have a sum divisible by 3. Can all four be divisible by 3?",
     notes: "Modular arithmetic on circular arrangements. Think in residues mod 3 \u2014 constraint forces a pattern on the residues.",
     solution: "Think in residues mod 3: {0, 1, 2}. \"No two adjacent sum to 0 mod 3\" bans pairs (0,0), (1,2), (2,1). So adjacent numbers must share the same nonzero residue, or one is 0 and the other nonzero.\n\nOriginal (5 on circle): The 0-residues can't be adjacent. Working through: exactly 2 must be divisible by 3. Answer: C.\n\nExample 2 (7 on circle): Same logic \u2014 2 must be divisible by 3.\n\nExample 3 (4 on circle): If all four \u2261 0 mod 3, every adjacent pair sums to 0 mod 3. So no \u2014 at most 2 of 4 can be divisible by 3.",
@@ -98,6 +103,7 @@ const DEFAULT_QUESTIONS = [
     id: 6,
     kind: "concept",
     tags: [],
+    source: "",
     question: "The sum of interior angles of an n-sided polygon is (n − 2) × 180°.\n\nExample 1: What is the sum of interior angles of a hexagon (6 sides)?\nExample 2: A polygon has interior angles that sum to 1440°. How many sides does it have?\nExample 3: What is each interior angle of a regular decagon (10 sides)?",
     notes: "Fundamental polygon angle formula. Derived by splitting any n-gon into (n − 2) triangles from one vertex. For regular polygons, each angle = (n − 2) × 180° / n.",
     solution: "Example 1: n = 6. Sum = (6 − 2) × 180° = 4 × 180° = 720°.\nExample 2: (n − 2) × 180 = 1440 → n − 2 = 8 → n = 10. It's a decagon.\nExample 3: n = 10. Sum = (10 − 2) × 180° = 1440°. Each angle = 1440° / 10 = 144°.",
@@ -108,6 +114,7 @@ const DEFAULT_QUESTIONS = [
     id: 7,
     kind: "problem",
     tags: [],
+    source: "",
     title: "Simplifying √(c + d√n)",
     question: "Step 1: Expand (p + q√2)². What form does the result take?\n\nStep 2: Now simplify √(3 + 2√2). (Hint: your answer to Step 1 tells you what form to guess.)\n\nExample 2: Simplify √(5 − 2√6).",
     notes: "Christopher needs to discover the a + b√n form himself by squaring first, rather than being told the answer format. Step 1 builds the mental model, Step 2 applies it.",
@@ -119,6 +126,7 @@ const DEFAULT_QUESTIONS = [
     id: 8,
     kind: "concept",
     tags: [],
+    source: "",
     title: "Breaking up nth roots: ⁿ√(ab)",
     question: "Simplify each expression by breaking it into separate roots.\n\nExample 1: ³√(8 × 27)\nExample 2: √(50)\nExample 3: ⁴√(16 × 81)",
     notes: "Tests whether Christopher remembers that ⁿ√(a·b) = ⁿ√a × ⁿ√b. The question deliberately does NOT state the rule — he should recall and apply it himself.",
@@ -130,6 +138,7 @@ const DEFAULT_QUESTIONS = [
     id: 9,
     kind: "concept",
     tags: [],
+    source: "",
     title: "Negative exponents: 1/aⁿ = a⁻ⁿ",
     question: "Rewrite each expression as a single power (with a possibly negative exponent).\n\nExample 1: 1/5³ = 5^?\nExample 2: 1/2⁴ = 2^?\nExample 3: (1/4)⁴ — rewrite everything as a power of 2.\nExample 4: (1/3)⁵ — rewrite as a power of 3.",
     notes: "Christopher had major trouble seeing that 1/4 = 2⁻² (and therefore working with negative exponents). This drills the key identity 1/aⁿ = a⁻ⁿ, then applies it in multi-step problems like (1/4)⁴ = 2^x.",
@@ -141,6 +150,7 @@ const DEFAULT_QUESTIONS = [
     id: 10,
     kind: "concept",
     tags: [],
+    source: "",
     title: "Arithmetic mean vs. geometric mean",
     question: "Part A: Define the geometric mean.\n— For two numbers a and b, the geometric mean is ___.\n— For three numbers a, b, and c, the geometric mean is ___.\n\nPart B: For positive numbers, which is always greater — the arithmetic mean or the geometric mean? Is there any exception?\n\nExample: Compute both means for {2, 8}. Then for {5, 5}.",
     notes: "AM-GM inequality is a classic competition tool. Key caveat: AM ≥ GM always, with equality only when all numbers are the same. Christopher should know both the definitions and the inequality.",
@@ -152,6 +162,7 @@ const DEFAULT_QUESTIONS = [
     id: 11,
     kind: "concept",
     tags: [],
+    source: "AMC 8 2025 Q5",
     title: "Nested radical expressions",
     question: "Simplify each expression to a single number.\n\nExample 1: [√((√5)³)]⁴\nExample 2: [√((√3)⁵)]²\nExample 3: [³√((√2)⁹)]²",
     notes: "Based on AMC 8 2025 Q5 style — nested radicals with an outer exponent. Convert everything to fractional exponents and multiply. Christopher should practice chaining exponent rules on radicals.",
@@ -163,6 +174,7 @@ const DEFAULT_QUESTIONS = [
     id: 12,
     kind: "concept",
     tags: [],
+    source: "",
     title: "Distributing exponents: (ab)ⁿ = aⁿ × bⁿ",
     question: "Expand and simplify. Remember: when raising a product to a power, the exponent applies to EVERY factor.\n\nExample 1: (5 × ³√2)³\nExample 2: (4 × √3)²\nExample 3: (2 × ⁵√7)⁵",
     notes: "Christopher made the error of only cubing the radical part and forgetting to cube the coefficient (e.g., computing 6 × (³√3)³ = 6 × 3 = 18 instead of 6³ × 3 = 648). This drills the rule (a·b)ⁿ = aⁿ · bⁿ.",
@@ -174,6 +186,7 @@ const DEFAULT_QUESTIONS = [
     id: 13,
     kind: "concept",
     tags: [],
+    source: "",
     question: "For x² + ax + b = 0, express a and b in terms of the roots.\n\nExample 1: roots are 3 and 5 → find a and b\nExample 2: roots are −2 and 7 → find a and b\nExample 3: roots are −4 and −1 → find a and b\n\n(Rederive if needed: factor as (x − r₁)(x − r₂) and expand.)",
     notes: "Vieta's formulas for monic quadratics. Common mistake: forgetting the sign flip on a (it's negative the sum, not the sum).",
     solution: "a = −(sum of roots),  b = product of roots\n\nExample 1: a = −(3+5) = −8,  b = 3×5 = 15\nExample 2: a = −(−2+7) = −5,  b = −2×7 = −14\nExample 3: a = −(−4−1) = 5,  b = −4×(−1) = 4",
@@ -184,6 +197,7 @@ const DEFAULT_QUESTIONS = [
     id: 14,
     kind: "concept",
     tags: [],
+    source: "",
     question: "For ax² + bx + c = 0, what are the sum and product of the roots?\n\nDerive from: ax² + bx + c = a(x − r₁)(x − r₂).\n\nExample: 2x² − 6x + 4 = 0",
     notes: "Vieta's formulas for general quadratics. Extends the monic version (Q13) — divide by a.",
     solution: "Derive: a(x − r₁)(x − r₂)\n= a[x² − r₂x − r₁x + r₁r₂]\n= a[x² − (r₁+r₂)x + r₁r₂]\n= ax² − a(r₁+r₂)x + a·r₁r₂\n\nCompare to ax² + bx + c:\nb = −a(r₁+r₂)  →  r₁+r₂ = −b/a\nc = a·r₁r₂  →  r₁r₂ = c/a\n\nSum = −b/a, Product = c/a\n\nExample: 2x² − 6x + 4 = 0. a=2, b=−6, c=4.\nSum = −(−6)/2 = 6/2 = 3.\nProduct = 4/2 = 2.\nVerify by factoring: 2(x−1)(x−2) = 0, roots are 1 and 2. Sum = 1+2 = 3 ✓. Product = 1×2 = 2 ✓.",
@@ -194,6 +208,7 @@ const DEFAULT_QUESTIONS = [
     id: 15,
     kind: "concept",
     tags: [],
+    source: "",
     question: "How do you compute the n-th root of x using exponents? What if n is a decimal?\n\nExample: What is the 1.2th root of 64?",
     notes: "The nth root of x is x^(1/n). When n is a decimal, convert to a fraction first. Tests comfort with rational exponents.",
     solution: "General: the nth root of x = x^(1/n).\n\nExample: The 1.2th root of 64 = 64^(1/1.2).\nConvert: 1.2 = 6/5, so 1/1.2 = 5/6.\n64^(5/6) = (2⁶)^(5/6) = 2⁵ = 32.\nAnswer: 32.",
@@ -204,6 +219,7 @@ const DEFAULT_QUESTIONS = [
     id: 16,
     kind: "concept",
     tags: ["lines"],
+    source: "",
     question: "What is the standard form of a line equation?\n\nIs 2x + 3y = 12 a line?\nIs y = x² + 1 a line?\nIs 5x − y = 7 a line?",
     notes: "The standard form is y = mx + b (slope-intercept) or equivalently ax + by = c. Any equation where x and y appear only to the first power (no x², xy, etc.) is a line.",
     solution: "Standard form: y = mx + b (slope-intercept form), or equivalently Ax + By = C.\n\nA line is any equation where x and y appear only to the 1st power.\n\n2x + 3y = 12 — YES, it's a line. Rearranges to y = −(2/3)x + 4.\ny = x² + 1 — NO, x is squared, so it's a parabola.\n5x − y = 7 — YES, it's a line. Rearranges to y = 5x − 7.",
@@ -214,6 +230,7 @@ const DEFAULT_QUESTIONS = [
     id: 17,
     kind: "concept",
     tags: ["lines"],
+    source: "",
     question: "In y = mx + b, what is m called and what does it actually mean?\n\nExample 1: For y = 3x + 1, if you move 1 step right in x, how much does y change?\nExample 2: For y = −2x + 5, if you move 1 step right in x, how much does y change?\nExample 3: For y = (1/4)x − 3, if you move 4 steps right in x, how much does y change?",
     notes: "m is the slope. Slope = rise/run. For every 1 unit increase in x, y increases by m units. Negative m means y decreases.",
     solution: "m is called the slope. It tells you: for every 1 unit you move right (in x), y changes by m units.\n\nExample 1: m = 3, so moving 1 right → y goes up 3.\nExample 2: m = −2, so moving 1 right → y goes DOWN 2.\nExample 3: m = 1/4, so moving 1 right → y goes up 1/4. Moving 4 right → y goes up 1.",
@@ -224,6 +241,7 @@ const DEFAULT_QUESTIONS = [
     id: 18,
     kind: "problem",
     tags: ["lines"],
+    source: "tutor worksheet",
     question: "How do you find the slope of the line through two points?\n\nExample 1: Find the slope of the line through (2, 5) and (6, 13).\n\nExample 2: An ant walks along y = x², from point A where x = 3 to point B where x = 3 + a (a is positive). What is the slope of the straight line AB?\n\nExample 3: Using your answer to Example 2, what happens to the slope as a gets closer and closer to 0?",
     notes: "Slope = rise/run = (y₂ − y₁)/(x₂ − x₁). The parabola version introduces the difference quotient — the slope of the secant line. As a → 0, this approaches the derivative (slope of the tangent).",
     solution: "Slope = (y₂ − y₁) / (x₂ − x₁)\n\nExample 1: (13 − 5) / (6 − 2) = 8/4 = 2.\n\nExample 2: Point A: x = 3, y = 9. Point B: x = 3 + a, y = (3 + a)² = 9 + 6a + a².\nSlope = (9 + 6a + a² − 9) / (3 + a − 3) = (6a + a²) / a = 6 + a.\n\nExample 3: As a → 0, slope → 6 + 0 = 6. This is the slope of the tangent line to y = x² at x = 3. (Check: derivative of x² is 2x, and 2(3) = 6 ✓.)",
@@ -234,6 +252,7 @@ const DEFAULT_QUESTIONS = [
     id: 19,
     kind: "concept",
     tags: ["lines"],
+    source: "",
     question: "In y = mx + b, what is b? What does it tell you about the graph?\n\nExample 1: What is the y-intercept of y = 4x − 7?\nExample 2: A line passes through (0, 5) with slope 2. Write its equation.\nExample 3: Where does y = 3x + 6 cross the y-axis? Where does it cross the x-axis?",
     notes: "b is the y-intercept — the y-value where the line crosses the y-axis (i.e., where x = 0). Finding the x-intercept means setting y = 0.",
     solution: "b is the y-intercept: the point where the line crosses the y-axis. It's the value of y when x = 0.\n\nExample 1: b = −7, so the line crosses the y-axis at (0, −7).\n\nExample 2: The y-intercept is 5 (since it passes through (0, 5)), so y = 2x + 5.\n\nExample 3: Y-axis: set x = 0 → y = 6, crosses at (0, 6).\nX-axis: set y = 0 → 3x + 6 = 0 → x = −2, crosses at (−2, 0).",
@@ -244,6 +263,7 @@ const DEFAULT_QUESTIONS = [
     id: 20,
     kind: "problem",
     tags: ["lines"],
+    source: "tutor worksheet",
     question: "How do you find where a line crosses the x-axis? The y-axis?\n\nExample 1: Find both intercepts of 5x + 12y = −60.\nExample 2: Find both intercepts of y = −3x + 9.\nExample 3: Find the perimeter of the triangle formed by 5x + 12y = −60 and the coordinate axes.",
     notes: "x-intercept: set y = 0. y-intercept: set x = 0. The triangle problem combines intercepts with distance formula.",
     solution: "x-intercept: set y = 0, solve for x. y-intercept: set x = 0, solve for y.\n\nExample 1: 5x + 12y = −60.\nx-intercept: 5x = −60 → x = −12. Point: (−12, 0).\ny-intercept: 12y = −60 → y = −5. Point: (0, −5).\n\nExample 2: y = −3x + 9.\nx-intercept: 0 = −3x + 9 → x = 3. Point: (3, 0).\ny-intercept: y = 9. Point: (0, 9).\n\nExample 3: The triangle has vertices (0, 0), (−12, 0), (0, −5).\nLegs: 12 (along x-axis) and 5 (along y-axis).\nHypotenuse: √(12² + 5²) = √(144 + 25) = √169 = 13.\nPerimeter = 12 + 5 + 13 = 30.",
@@ -254,6 +274,7 @@ const DEFAULT_QUESTIONS = [
     id: 21,
     kind: "concept",
     tags: ["lines"],
+    source: "tutor worksheet",
     question: "What does it mean if two lines have the same slope?\n\ny = 3x + 2 and y = 3x + 5 — do they ever intersect?\n\nIf the distinct lines y = ax + b and y = −7x + 49 never intersect, what is the value of a?",
     notes: "Lines with the same slope are parallel — they never intersect (unless they're the same line). 'Distinct' means b ≠ 49.",
     solution: "Two lines with the same slope are parallel — they never meet.\n\ny = 3x + 2 and y = 3x + 5: both have slope 3, so they're parallel. They never intersect. (The gap between them is always 3 units vertically.)\n\nFor y = ax + b and y = −7x + 49 to never intersect, they must be parallel (and distinct). Same slope means a = −7.",
@@ -264,6 +285,7 @@ const DEFAULT_QUESTIONS = [
     id: 22,
     kind: "problem",
     tags: ["lines"],
+    source: "tutor worksheet",
     question: "Four lines:\ny = 3x + 2\ny = 3x + 5\ny = −x + 10\ny = −x + 15\n\nConsider the points where these lines cross each other. If you connect all of these points, what shape do you get?",
     notes: "Two pairs of parallel lines form a parallelogram. Key reasoning: lines with the same slope are parallel and never intersect, so intersections only happen between lines of different slopes → 4 points forming a parallelogram.",
     solution: "Parallel pairs: {y = 3x + 2, y = 3x + 5} (both slope 3) and {y = −x + 10, y = −x + 15} (both slope −1).\n\nParallel lines never intersect each other. Each slope-3 line crosses each slope-(−1) line, giving 2 × 2 = 4 intersection points.\n\nThe shape is a parallelogram — opposite sides are parallel because they lie on lines with the same slope.",
@@ -274,6 +296,7 @@ const DEFAULT_QUESTIONS = [
     id: 23,
     kind: "problem",
     tags: ["lines"],
+    source: "tutor worksheet",
     question: "There are six different parallel lines of slope 1/3 that are equal distance apart. If the distance between the y-intercepts of two adjacent lines is 72, find the distance between the x-intercepts of those two adjacent lines.",
     notes: "Tests understanding of how slope connects x- and y-intercepts. If y-intercepts differ by 72, the x-intercepts differ by a related amount determined by the slope.",
     solution: "Each line has the form y = (1/3)x + b.\n\ny-intercept is at (0, b). x-intercept: set y = 0 → x = −3b, so x-intercept is at (−3b, 0).\n\nTwo adjacent lines: y = (1/3)x + b₁ and y = (1/3)x + b₂, with |b₂ − b₁| = 72.\n\nTheir x-intercepts are −3b₁ and −3b₂.\nDistance between x-intercepts = |−3b₂ − (−3b₁)| = 3|b₂ − b₁| = 3 × 72 = 216.",
@@ -336,8 +359,8 @@ function mergeDefaults(loaded) {
     const merged = { ...q };
     for (const key of Object.keys(def)) {
       if (key === "id") continue;
-      // Overwrite question/solution/notes/kind from defaults (allows edits to propagate)
-      if (key === "question" || key === "solution" || key === "notes" || key === "kind") {
+      // Overwrite question/solution/notes/kind/source from defaults (allows edits to propagate)
+      if (key === "question" || key === "solution" || key === "notes" || key === "kind" || key === "source") {
         merged[key] = def[key];
       } else if (merged[key] === undefined) {
         merged[key] = def[key];
@@ -481,6 +504,7 @@ function SpacedRepTracker() {
   const [addN, setAddN] = useState("");
   const [addS, setAddS] = useState("");
   const [addKind, setAddKind] = useState("problem");
+  const [addSource, setAddSource] = useState("");
   const [kindFilter, setKindFilter] = useState("all");
   const [showSolution, setShowSolution] = useState(null);
   const fileRef = useRef(null);
@@ -555,11 +579,11 @@ function SpacedRepTracker() {
 
   const doAdd = async () => {
     if (!addQ.trim()) return;
-    const q = { id: nextId(qs), kind: addKind, tags: [], title: addT.trim() || undefined, question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [{ date: TODAY, result: "pass" }] };
+    const q = { id: nextId(qs), kind: addKind, tags: [], source: addSource.trim(), title: addT.trim() || undefined, question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [{ date: TODAY, result: "pass" }] };
     const updated = [...qs, q];
     setQs(updated);
     await save(updated);
-    setAddT(""); setAddQ(""); setAddN(""); setAddS(""); setAddKind("problem");
+    setAddT(""); setAddQ(""); setAddN(""); setAddS(""); setAddKind("problem"); setAddSource("");
     flash("Added");
     setTab("all");
   };
@@ -812,6 +836,8 @@ function SpacedRepTracker() {
               style={{ ...inputStyle, fontSize: 13, marginTop: 8 }} />
             <textarea value={addS} onChange={(e) => setAddS(e.target.value)} placeholder="Solution (optional, hidden until revealed)..."
               style={{ ...inputStyle, fontSize: 13, marginTop: 8, minHeight: 60, resize: "vertical" }} />
+            <input value={addSource} onChange={(e) => setAddSource(e.target.value)} placeholder="Source (optional, e.g. AMC 8 2025 Q5)..."
+              style={{ ...inputStyle, fontSize: 13, marginTop: 8 }} />
             <div style={{ display: "flex", gap: 4, marginTop: 8 }}>
               {[["problem", "Problem"], ["concept", "Concept"]].map(([v, l]) => (
                 <button key={v} onClick={() => setAddKind(v)} style={pillBtn(addKind === v)}>{l}</button>
@@ -882,6 +908,7 @@ function SpacedRepTracker() {
                           <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 2 }}>
                             {q.title && <span style={{ fontSize: 11, color: C.dim, fontFamily: MONO }}>{q.title}</span>}
                             <span style={{ fontSize: 9, fontFamily: MONO, fontWeight: 600, letterSpacing: "0.05em", padding: "1px 5px", borderRadius: 3, background: (q.kind || "problem") === "concept" ? "#6366f1" + "22" : C.accent + "22", color: (q.kind || "problem") === "concept" ? "#818cf8" : C.accent }}>{(q.kind || "problem").toUpperCase()}</span>
+                            {q.source && <span style={{ fontSize: 9, fontFamily: MONO, color: C.dim, padding: "1px 5px", borderRadius: 3, border: `1px solid ${C.border}` }}>{q.source}</span>}
                           </div>
                           <div style={{ fontSize: 14, lineHeight: 1.5, whiteSpace: "pre-line", overflow: "hidden",
                             display: "-webkit-box", WebkitLineClamp: isExp ? 999 : 2, WebkitBoxOrient: "vertical" }}>
@@ -954,6 +981,7 @@ function SpacedRepTracker() {
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "question"); }} style={btn(C.card, C.dim)}>Edit Q</button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "notes"); }} style={btn(C.card, C.dim)}>Edit Notes</button>
                           <button onClick={(e) => { e.stopPropagation(); startEdit(q, "solution"); }} style={btn(C.card, C.dim)}>Edit Solution</button>
+                          <button onClick={(e) => { e.stopPropagation(); startEdit(q, "source"); }} style={btn(C.card, C.dim)}>Edit Source</button>
                           <button onClick={(e) => { e.stopPropagation(); doUndo(q.id); }} disabled={!q.attempts.length}
                             style={{ ...btn(C.card, C.dim), opacity: q.attempts.length ? 1 : 0.3, cursor: q.attempts.length ? "pointer" : "default" }}>
                             Undo attempt
@@ -978,6 +1006,7 @@ function SpacedRepTracker() {
             <div className="print-q-header">
               Q{i + 1}{q.title ? `: ${q.title}` : ""}
               <span className="print-kind">{(q.kind || "problem").toUpperCase()}</span>
+              {q.source && <span className="print-kind">{q.source}</span>}
             </div>
             <div className="print-label">Question</div>
             <div className="print-body">{q.question}</div>
