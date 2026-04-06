@@ -226,5 +226,141 @@
         "result": "pass"
       }
     ]
+  },
+  {
+    "id": 16,
+    "kind": "concept",
+    "tags": [
+      "lines"
+    ],
+    "question": "What is the standard form of a line equation?\n\nIs 2x + 3y = 12 a line?\nIs y = x² + 1 a line?\nIs 5x − y = 7 a line?",
+    "notes": "The standard form is y = mx + b (slope-intercept) or equivalently ax + by = c. Any equation where x and y appear only to the first power (no x², xy, etc.) is a line.",
+    "solution": "Standard form: y = mx + b (slope-intercept form), or equivalently Ax + By = C.\n\nA line is any equation where x and y appear only to the 1st power.\n\n2x + 3y = 12 — YES, it's a line. Rearranges to y = −(2/3)x + 4.\ny = x² + 1 — NO, x is squared, so it's a parabola.\n5x − y = 7 — YES, it's a line. Rearranges to y = 5x − 7.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "kind": "concept",
+    "tags": [
+      "lines"
+    ],
+    "question": "In y = mx + b, what is m called and what does it actually mean?\n\nExample 1: For y = 3x + 1, if you move 1 step right in x, how much does y change?\nExample 2: For y = −2x + 5, if you move 1 step right in x, how much does y change?\nExample 3: For y = (1/4)x − 3, if you move 4 steps right in x, how much does y change?",
+    "notes": "m is the slope. Slope = rise/run. For every 1 unit increase in x, y increases by m units. Negative m means y decreases.",
+    "solution": "m is called the slope. It tells you: for every 1 unit you move right (in x), y changes by m units.\n\nExample 1: m = 3, so moving 1 right → y goes up 3.\nExample 2: m = −2, so moving 1 right → y goes DOWN 2.\nExample 3: m = 1/4, so moving 1 right → y goes up 1/4. Moving 4 right → y goes up 1.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "kind": "problem",
+    "tags": [
+      "lines"
+    ],
+    "question": "How do you find the slope of the line through two points?\n\nExample 1: Find the slope of the line through (2, 5) and (6, 13).\n\nExample 2: An ant walks along y = x², from point A where x = 3 to point B where x = 3 + a (a is positive). What is the slope of the straight line AB?\n\nExample 3: Using your answer to Example 2, what happens to the slope as a gets closer and closer to 0?",
+    "notes": "Slope = rise/run = (y₂ − y₁)/(x₂ − x₁). The parabola version introduces the difference quotient — the slope of the secant line. As a → 0, this approaches the derivative (slope of the tangent).",
+    "solution": "Slope = (y₂ − y₁) / (x₂ − x₁)\n\nExample 1: (13 − 5) / (6 − 2) = 8/4 = 2.\n\nExample 2: Point A: x = 3, y = 9. Point B: x = 3 + a, y = (3 + a)² = 9 + 6a + a².\nSlope = (9 + 6a + a² − 9) / (3 + a − 3) = (6a + a²) / a = 6 + a.\n\nExample 3: As a → 0, slope → 6 + 0 = 6. This is the slope of the tangent line to y = x² at x = 3. (Check: derivative of x² is 2x, and 2(3) = 6 ✓.)",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "kind": "concept",
+    "tags": [
+      "lines"
+    ],
+    "question": "In y = mx + b, what is b? What does it tell you about the graph?\n\nExample 1: What is the y-intercept of y = 4x − 7?\nExample 2: A line passes through (0, 5) with slope 2. Write its equation.\nExample 3: Where does y = 3x + 6 cross the y-axis? Where does it cross the x-axis?",
+    "notes": "b is the y-intercept — the y-value where the line crosses the y-axis (i.e., where x = 0). Finding the x-intercept means setting y = 0.",
+    "solution": "b is the y-intercept: the point where the line crosses the y-axis. It's the value of y when x = 0.\n\nExample 1: b = −7, so the line crosses the y-axis at (0, −7).\n\nExample 2: The y-intercept is 5 (since it passes through (0, 5)), so y = 2x + 5.\n\nExample 3: Y-axis: set x = 0 → y = 6, crosses at (0, 6).\nX-axis: set y = 0 → 3x + 6 = 0 → x = −2, crosses at (−2, 0).",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "kind": "problem",
+    "tags": [
+      "lines"
+    ],
+    "question": "How do you find where a line crosses the x-axis? The y-axis?\n\nExample 1: Find both intercepts of 5x + 12y = −60.\nExample 2: Find both intercepts of y = −3x + 9.\nExample 3: Find the perimeter of the triangle formed by 5x + 12y = −60 and the coordinate axes.",
+    "notes": "x-intercept: set y = 0. y-intercept: set x = 0. The triangle problem combines intercepts with distance formula.",
+    "solution": "x-intercept: set y = 0, solve for x. y-intercept: set x = 0, solve for y.\n\nExample 1: 5x + 12y = −60.\nx-intercept: 5x = −60 → x = −12. Point: (−12, 0).\ny-intercept: 12y = −60 → y = −5. Point: (0, −5).\n\nExample 2: y = −3x + 9.\nx-intercept: 0 = −3x + 9 → x = 3. Point: (3, 0).\ny-intercept: y = 9. Point: (0, 9).\n\nExample 3: The triangle has vertices (0, 0), (−12, 0), (0, −5).\nLegs: 12 (along x-axis) and 5 (along y-axis).\nHypotenuse: √(12² + 5²) = √(144 + 25) = √169 = 13.\nPerimeter = 12 + 5 + 13 = 30.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "kind": "concept",
+    "tags": [
+      "lines"
+    ],
+    "question": "What does it mean if two lines have the same slope?\n\ny = 3x + 2 and y = 3x + 5 — do they ever intersect?\n\nIf the distinct lines y = ax + b and y = −7x + 49 never intersect, what is the value of a?",
+    "notes": "Lines with the same slope are parallel — they never intersect (unless they're the same line). 'Distinct' means b ≠ 49.",
+    "solution": "Two lines with the same slope are parallel — they never meet.\n\ny = 3x + 2 and y = 3x + 5: both have slope 3, so they're parallel. They never intersect. (The gap between them is always 3 units vertically.)\n\nFor y = ax + b and y = −7x + 49 to never intersect, they must be parallel (and distinct). Same slope means a = −7.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "kind": "problem",
+    "tags": [
+      "lines"
+    ],
+    "question": "Four lines:\ny = 3x + 2\ny = 3x + 5\ny = −x + 10\ny = −x + 15\n\nConsider the points where these lines cross each other. If you connect all of these points, what shape do you get?",
+    "notes": "Two pairs of parallel lines form a parallelogram. Key reasoning: lines with the same slope are parallel and never intersect, so intersections only happen between lines of different slopes → 4 points forming a parallelogram.",
+    "solution": "Parallel pairs: {y = 3x + 2, y = 3x + 5} (both slope 3) and {y = −x + 10, y = −x + 15} (both slope −1).\n\nParallel lines never intersect each other. Each slope-3 line crosses each slope-(−1) line, giving 2 × 2 = 4 intersection points.\n\nThe shape is a parallelogram — opposite sides are parallel because they lie on lines with the same slope.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "kind": "problem",
+    "tags": [
+      "lines"
+    ],
+    "question": "There are six different parallel lines of slope 1/3 that are equal distance apart. If the distance between the y-intercepts of two adjacent lines is 72, find the distance between the x-intercepts of those two adjacent lines.",
+    "notes": "Tests understanding of how slope connects x- and y-intercepts. If y-intercepts differ by 72, the x-intercepts differ by a related amount determined by the slope.",
+    "solution": "Each line has the form y = (1/3)x + b.\n\ny-intercept is at (0, b). x-intercept: set y = 0 → x = −3b, so x-intercept is at (−3b, 0).\n\nTwo adjacent lines: y = (1/3)x + b₁ and y = (1/3)x + b₂, with |b₂ − b₁| = 72.\n\nTheir x-intercepts are −3b₁ and −3b₂.\nDistance between x-intercepts = |−3b₂ − (−3b₁)| = 3|b₂ − b₁| = 3 × 72 = 216.",
+    "dateAdded": "2026-04-06",
+    "attempts": [
+      {
+        "date": "2026-04-06",
+        "result": "pass"
+      }
+    ]
   }
 ]
