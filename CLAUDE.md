@@ -48,6 +48,7 @@ Most sessions here are "add to spaced rep: [topic]". The workflow:
 - `mergeDefaults` also backfills missing fields (e.g., solution) onto existing questions
 - Save wipe guard: never overwrites N questions with 0
 - Spacing schedule: 1 attempt→3d, 2→7d, 3→14d, 4+→30d
+- GitHub sync: `ghFetch` handles files >1MB via `download_url` fallback (GitHub Contents API returns `content: null` for large files)
 
 ## Rules
 
