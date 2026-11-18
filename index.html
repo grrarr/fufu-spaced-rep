@@ -307,7 +307,10 @@ const DEFAULT_QUESTIONS = [
 
 /* ═══════════════════════════════════════════════════════════════════════════════ */
 
-const TODAY = new Date().toISOString().split("T")[0];
+// Eastern calendar date (en-CA = YYYY-MM-DD), never the UTC date: from 7-8pm ET
+// toISOString() is already tomorrow and the next day's review overwrote that attempt.
+// Pinned by test-today-et-app.js (audit FT-A1, 2026-11-18).
+const TODAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const STORAGE_KEY = "fufu-spaced-rep-v1";
 const BACKUP_KEY = "fufu-spaced-rep-v1-backup";
 const EXPORT_REMINDER_KEY = "fufu-last-exported";
