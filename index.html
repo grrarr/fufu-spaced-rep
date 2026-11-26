@@ -311,6 +311,35 @@ const DEFAULT_QUESTIONS = [
 // toISOString() is already tomorrow and the next day's review overwrote that attempt.
 // Pinned by test-today-et-app.js (audit FT-A1, 2026-11-18).
 const TODAY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+// FT-A2: TODAY is fixed at page load; this re-reads the Eastern date so a tab left open overnight notices.
+const etToday = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+
+// FT-A3 + FT-A4 (2026-11-25, Andrew "defaults"): merge two copies of the card list. Every card from both
+// is kept (local order first, then cards only the other copy has); card fields come from the local copy;
+// attempts are the union, ONE per card per day - on a clash the newer `at` (ms) stamp wins, a stamped
+// attempt beats an unstamped one, and with no stamps the local attempt wins. Caveat: a card deleted on
+// one device comes back if the other copy still has it. Pure - test-ft-a234.js evals this block.
+// ---- pure: mergeQuestions ----
+function mergeQuestions(local, remote) {
+  const norm = (a) => (typeof a === "string" ? { date: a, result: "pass" } : a);
+  const mergeAttempts = (mine, theirs) => {
+    const byDate = new Map();
+    (mine || []).map(norm).forEach((a) => byDate.set(a.date, a));
+    (theirs || []).map(norm).forEach((b) => {
+      const a = byDate.get(b.date);
+      if (!a || (b.at && (!a.at || b.at > a.at))) byDate.set(b.date, b);
+    });
+    return [...byDate.values()].sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : 0));
+  };
+  const L = local || [], R = remote || [];
+  const rById = new Map(R.map((x) => [x.id, x]));
+  const out = L.map((x) => (rById.has(x.id) ? { ...x, attempts: mergeAttempts(x.attempts, rById.get(x.id).attempts) } : x));
+  const have = new Set(L.map((x) => x.id));
+  R.forEach((x) => { if (!have.has(x.id)) out.push(x); });
+  return out;
+}
+const addFormEmpty = (fields) => fields.every((f) => !String(f || "").trim());
+// ---- end pure mergeQuestions ----
 const STORAGE_KEY = "fufu-spaced-rep-v1";
 const BACKUP_KEY = "fufu-spaced-rep-v1-backup";
 const EXPORT_REMINDER_KEY = "fufu-last-exported";
@@ -540,15 +569,45 @@ function SpacedRepTracker() {
       setGhStatus("saving");
       try {
         let sha = ghShaRef.current;
+        let toWrite = newQs;
         if (!sha) {
           const existing = await ghFetch(token);
           sha = existing?.sha || null;
+          if (existing) toWrite = mergeQuestions(newQs, existing.questions);  // FT-A3: never drop GitHub's attempts
         }
-        const newSha = await ghWrite(token, newQs, sha);
+        let newSha;
+        try {
+          newSha = await ghWrite(token, toWrite, sha);
+        } catch (e) {
+          // FT-A4: 409 = another device saved since this one read GitHub - re-read, merge, retry once
+          if (String(e && e.message) !== "409") throw e;
+          const existing = await ghFetch(token);
+          if (!existing) throw e;
+          toWrite = mergeQuestions(newQs, existing.questions);
+          newSha = await ghWrite(token, toWrite, existing.sha);
+        }
+        if (toWrite !== newQs) { setQs(toWrite); await storageSave(toWrite, prevCountRef.current); prevCountRef.current = toWrite.length; }
         ghShaRef.current = newSha;
         setGhStatus("synced");
       } catch { setGhStatus("error"); }
     }
+  }, []);
+
+  // FT-A2: on a new Eastern day, reload (TODAY is fixed at load) if the add-card form is empty;
+  // otherwise show a banner so half-typed text is never lost.
+  const [newDay, setNewDay] = useState(false);
+  const addFieldsRef = useRef([]);
+  addFieldsRef.current = [addT, addQ, addN, addS, addSource];
+  useEffect(() => {
+    const check = () => {
+      if (document.visibilityState === "hidden" || etToday() === TODAY) return;
+      if (addFormEmpty(addFieldsRef.current)) location.reload();
+      else setNewDay(true);
+    };
+    document.addEventListener("visibilitychange", check);
+    window.addEventListener("focus", check);
+    const t = setInterval(check, 10 * 60 * 1000);
+    return () => { document.removeEventListener("visibilitychange", check); window.removeEventListener("focus", check); clearInterval(t); };
   }, []);
 
   useEffect(() => {
@@ -576,6 +635,12 @@ function SpacedRepTracker() {
 
       // Fall back to localStorage
       if (!loaded) loaded = await storageLoad();
+      // FT-A3: GitHub loaded - fold in this device's own copy so attempts logged here without a
+      // GitHub key (the tutor's device) are not thrown away
+      else {
+        const local = await storageLoad();
+        if (local.length) loaded = mergeQuestions(local, loaded);
+      }
 
       setQs(loaded);
       prevCountRef.current = loaded.length;
@@ -591,7 +656,7 @@ function SpacedRepTracker() {
 
   const doAdd = async () => {
     if (!addQ.trim()) return;
-    const q = { id: nextId(qs), kind: addKind, tags: [], source: addSource.trim(), title: addT.trim() || undefined, question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [{ date: TODAY, result: "pass" }] };
+    const q = { id: nextId(qs), kind: addKind, tags: [], source: addSource.trim(), title: addT.trim() || undefined, question: addQ.trim(), notes: addN.trim(), solution: addS.trim(), dateAdded: TODAY, attempts: [{ date: TODAY, result: "pass", at: Date.now() }] };
     const updated = [...qs, q];
     setQs(updated);
     await save(updated);
@@ -608,10 +673,10 @@ function SpacedRepTracker() {
       const todayIdx = q.attempts.findIndex((a) => normAttempt(a).date === TODAY);
       if (todayIdx >= 0) {
         const newAttempts = [...q.attempts];
-        newAttempts[todayIdx] = { date: TODAY, result };
+        newAttempts[todayIdx] = { date: TODAY, result, at: Date.now() };  // FT-A3 stamp: newest per day wins a merge
         return { ...q, attempts: newAttempts };
       }
-      return { ...q, attempts: [...q.attempts, { date: TODAY, result }] };
+      return { ...q, attempts: [...q.attempts, { date: TODAY, result, at: Date.now() }] };
     });
     setQs(updated);
     await save(updated);
@@ -694,7 +759,10 @@ function SpacedRepTracker() {
     try {
       const existing = await ghFetch(t);
       const sha = existing?.sha || null;
-      const newSha = await ghWrite(t, qs, sha);
+      // FT-A3: a new key on this device must not overwrite GitHub's attempts - merge first
+      const toWrite = existing ? mergeQuestions(qs, existing.questions) : qs;
+      const newSha = await ghWrite(t, toWrite, sha);
+      if (toWrite !== qs) { setQs(toWrite); await storageSave(toWrite, prevCountRef.current); prevCountRef.current = toWrite.length; }
       ghShaRef.current = newSha;
       setGhStatus("synced");
       flash("Connected to GitHub");
@@ -820,6 +888,14 @@ function SpacedRepTracker() {
         {expWarn && (
           <div style={{ background: "#1a1400", border: `1px solid ${C.warn}33`, borderRadius: 6, padding: "6px 12px", marginBottom: 12, fontSize: 12, color: C.warn, fontFamily: MONO }}>
             {expWarn}
+          </div>
+        )}
+
+        {/* FT-A2 new-day banner (shown instead of an automatic reload while the add form has text) */}
+        {newDay && (
+          <div style={{ background: "#1a1400", border: `1px solid ${C.warn}66`, borderRadius: 6, padding: "8px 12px", marginBottom: 12, fontSize: 13, color: C.warn, fontFamily: MONO, textAlign: "center" }}>
+            New day - reload the page before logging reviews (copy any text you are typing first).{" "}
+            <button onClick={() => location.reload()} style={btn(C.warn, "#000")}>Reload</button>
           </div>
         )}
 
