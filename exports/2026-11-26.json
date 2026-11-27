@@ -385,5 +385,41 @@
         "result": "pass"
       }
     ]
+  },
+  {
+    "id": 24,
+    "kind": "concept",
+    "tags": [
+      "divisibility"
+    ],
+    "source": "Chinese olympiad worksheet",
+    "question": "Memorize: 111111 = ?  (factor it)\nWhy can you throw away blocks of six equal digits when checking divisibility by 7, 11 or 13?\n\nExample 1: Is 444444444444 (twelve 4s) divisible by 13?\nExample 2: 7 divides 22...2 a 33...3 (fifty 2s, then digit a, then fifty 3s). Shrink the number before solving.",
+    "notes": "From a Chinese-olympiad worksheet problem, 2026-11-26. Long digit runs are a scare tactic: blocks of six equal digits are multiples of 7, 11 and 13 and can be dropped. Watch the leftover: 50 = 6 x 8 + 2. Pairs with the 1001 card.",
+    "solution": "111111 = 3 x 7 x 11 x 13 x 37, so any six equal digits (222222, 444444, ...) is a multiple of 7, 11 and 13.\n\nExample 1: twelve 4s = 444444 x 1000001, and 444444 is a multiple of 13 -> yes.\nExample 2: 50 = 6 x 8 + 2, so drop 48 digits from each run -> 7 divides 22a33. Finish with the 1001 card: a = 5.",
+    "dateAdded": "2026-11-26",
+    "attempts": [
+      {
+        "date": "2026-11-26",
+        "result": "pass"
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "kind": "concept",
+    "tags": [
+      "divisibility"
+    ],
+    "source": "Chinese olympiad worksheet",
+    "question": "Memorize: 1001 = ?  Use it to test divisibility by 7 (\"cut off three\").\n\nExample 1: 7 divides 22a33. Find the digit a.\nExample 2: Is 123123 divisible by 7? By 13?",
+    "notes": "Pairs with the 111111 card; same worksheet problem (2026-11-26). Chinese olympiad name: 截三法. Works for 7, 11 and 13 at once.",
+    "solution": "1001 = 7 x 11 x 13, so 1000 is 1 less than a multiple of 7 (1000 = -1 mod 7).\nSplit the number into 3-digit groups from the right and alternate - and +; the result is divisible by 7 / 11 / 13 exactly when the number is.\nWhy: 22a33 = 22 x 1001 + (a33 - 22), and 22 x 1001 is already a multiple of 7.\n\nExample 1: a33 - 22 = a11; the only multiple of 7 of that form is 511 = 7 x 73 -> a = 5 (check: 22533 = 7 x 3219).\nExample 2: 123123 = 123 x 1001 -> yes to both (any abcabc works).",
+    "dateAdded": "2026-11-26",
+    "attempts": [
+      {
+        "date": "2026-11-26",
+        "result": "pass"
+      }
+    ]
   }
 ]
